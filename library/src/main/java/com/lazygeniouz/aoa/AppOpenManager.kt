@@ -40,14 +40,12 @@ class AppOpenManager(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
+    private fun onStart() {
         Log.d(TAG, "onStart()")
         showAdIfAvailable()
     }
 
-    /**
-     * Let's fetch the Ad
-     */
+    // Let's fetch the Ad
     private fun fetchAd() {
         if (isAdAvailable()) return
         loadAd()
@@ -60,7 +58,7 @@ class AppOpenManager(
             getFullScreenContentCallback()
         )
         else {
-            Log.d(TAG, "Can not show the Ad.")
+            Log.d(TAG, "A pre-cached Ad was not available, loading one.")
             fetchAd()
         }
     }
@@ -77,14 +75,13 @@ class AppOpenManager(
             override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
                 this@AppOpenManager.appOpenAd = loadedAd
                 loadTime = getCurrentTime()
-                Log.d(TAG, "onAppOpenAdLoaded()")
+                Log.d(TAG, "Ad Loaded")
             }
 
             override fun onAppOpenAdFailedToLoad(loadError: LoadAdError) {
                 Log.e(
                     TAG,
-                    "App Open Ad Failed To Load, Reason: ${loadError.responseInfo}, " +
-                            "\nDo not manually call fetch again, the Ads SDK handles that for you."
+                    "Ad Failed To Load, Reason: ${loadError.responseInfo}"
                 )
             }
         }
@@ -106,7 +103,7 @@ class AppOpenManager(
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
-                Log.e(TAG, "onAdFailedToShowFullScreenContent: ${adError?.message}")
+                Log.e(TAG, "Ad Failed To Show Full-Screen Content: ${adError?.message}")
             }
 
             override fun onAdShowedFullScreenContent() {
@@ -116,6 +113,5 @@ class AppOpenManager(
     }
 
     // Returns `true` if available, `false` otherwise.
-    private fun isAdAvailable(): Boolean = (appOpenAd != null) &&
-            fourHoursAgo()
+    private fun isAdAvailable(): Boolean = (appOpenAd != null) && fourHoursAgo()
 }
