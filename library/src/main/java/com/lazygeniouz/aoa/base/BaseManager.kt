@@ -50,8 +50,9 @@ open class BaseManager(private val application: Application) :
     }
 
     protected fun saveInitialDelayTime() {
-        val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
-        if (savedDelay == 0L) sharedPreferences.edit().putLong("savedDelay", getCurrentTime())
+        val initialDelayKey = "savedDelay"
+        val savedDelay = sharedPreferences.getLong(initialDelayKey, 0L)
+        if (savedDelay == 0L) sharedPreferences.edit().putLong(initialDelayKey, getCurrentTime())
             .apply()
     }
 
