@@ -52,7 +52,6 @@ open class BaseObserver(application: Application) :
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     companion object {
-        internal const val TAG = "AppOpenManager"
         internal const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
     }
 }

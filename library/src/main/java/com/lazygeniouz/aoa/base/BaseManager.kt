@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.appopen.AppOpenAd
+import com.lazygeniouz.aoa.idelay.InitialDelay
 import java.time.Instant
 import java.util.*
 
@@ -16,7 +17,7 @@ import java.util.*
  * so that our main usable class does not have a lot of methods and variables.
  * @see com.lazygeniouz.aoa.AppOpenManager
  */
-open class BaseManager(application: Application) :
+open class BaseManager(private val application: Application) :
     BaseObserver(application) {
 
     private val sharedPreferences =
@@ -26,9 +27,13 @@ open class BaseManager(application: Application) :
     protected var appOpenAd: AppOpenAd? = null
     protected var loadCallback: AppOpenAd.AppOpenAdLoadCallback? = null
 
-    open var adRequest: AdRequest = AdRequest.Builder().build()
     open var adUnitId: String = TEST_AD_UNIT_ID
+    open var adRequest: AdRequest = AdRequest.Builder().build()
+    open var initialDelay: InitialDelay = InitialDelay()
     open var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
+
+
+    protected fun getApplication(): Application = application
 
     // SharedPreferences keep a better track
     protected var loadTime: Long
@@ -44,10 +49,27 @@ open class BaseManager(application: Application) :
         else Instant.now().toEpochMilli()
     }
 
-    // Because the Ads are only cached for 4 Hours.
-    protected fun fourHoursAgo(): Boolean {
+    protected fun saveInitialDelayTime() {
+        val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
+        if (savedDelay == 0L) sharedPreferences.edit().putLong("savedDelay", getCurrentTime())
+            .apply()
+    }
+
+    // The documentation says that the Ads are only cached for 4 Hours.
+    private fun notLongerThanFourHours(): Boolean {
         val dateDifference = getCurrentTime() - loadTime
         val fourHours: Long = (3600000 * 4)
         return dateDifference < fourHours
+    }
+
+    // Returns `true` if an Ad is available & valid,
+    // `false` otherwise.
+    protected fun isAdAvailable(): Boolean = (appOpenAd != null) && notLongerThanFourHours()
+
+    // difference = Current Time `minus` Saved Time
+    // therefore, difference >= duration.getTime()
+    protected fun isInitialDelayOver(): Boolean {
+        val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
+        return (getCurrentTime() - savedDelay) >= initialDelay.getTime()
     }
 }
