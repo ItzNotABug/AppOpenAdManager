@@ -6,7 +6,7 @@ If you look at the [tutorial](https://developers.google.com/admob/android/app-op
 The wrapper should have been included in the core Ads SDK itself but it wasn't, So I ended up creating the wrapper!\
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
-### Usage
+## Usage
 **Kotlin:**
 ```kotlin
 AppOpenManager(this, InitialDelay.NONE, adUnitId, adRequest, orientation)
