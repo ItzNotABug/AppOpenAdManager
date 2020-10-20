@@ -17,7 +17,7 @@ import com.lazygeniouz.aoa.extensions.logDebug
  */
 class InitialDelay(
     private val delayCount: Int = 1,
-    val delayPeriodType: DelayType = DelayType.DAYS
+    internal val delayPeriodType: DelayType = DelayType.DAYS
 ) {
     init {
         // Zero is fine
@@ -42,7 +42,7 @@ class InitialDelay(
     }
 
     companion object {
-        // No Initial Delay
+        @JvmField
         val NONE = InitialDelay(0, DelayType.NONE)
     }
 }

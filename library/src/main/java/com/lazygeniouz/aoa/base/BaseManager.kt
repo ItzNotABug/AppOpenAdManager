@@ -32,7 +32,6 @@ open class BaseManager(private val application: Application) :
     open var initialDelay: InitialDelay = InitialDelay()
     open var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
 
-
     protected fun getApplication(): Application = application
 
     // SharedPreferences keep a better track

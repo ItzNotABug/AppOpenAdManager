@@ -6,7 +6,7 @@ import android.os.Bundle
 
 /**
  * Base Observer class to identify the Current visible Activity
- * @param application = Required to register Activity Lifecycle Callbacks
+ * @param application Required to register Activity Lifecycle Callbacks
  *
  * We only need onActivityStarted, onActivityResumed & onActivityDestroyed
  * to track the Current visible Activity & therefore it was meaningless

@@ -1,6 +1,7 @@
 package com.lazygeniouz.aoa
 
 import android.app.Application
+import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -32,9 +33,9 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
  * @see AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE
  *
  */
-class AppOpenManager(
-    application: Application,
-    initialDelay: InitialDelay,
+class AppOpenManager @JvmOverloads constructor(
+    @NonNull application: Application,
+    @NonNull initialDelay: InitialDelay,
     override var adUnitId: String = TEST_AD_UNIT_ID,
     override var adRequest: AdRequest = AdRequest.Builder().build(),
     override var orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
