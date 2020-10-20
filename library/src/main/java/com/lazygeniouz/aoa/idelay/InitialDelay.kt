@@ -4,7 +4,7 @@ import com.lazygeniouz.aoa.extensions.logDebug
 
 /**
  * Allowing the developer to have an initial delay for showing the Ad after the app is first installed.
- * The Duration class can pass on the information of initial delay.
+ * The InitialDelay class can pass on the information of initial delay.
  *
  * Default delay is set to 1 Day as it is a good practise to
  * allow the user to first explore the App & therefore 1 Day is fine.
@@ -12,7 +12,7 @@ import com.lazygeniouz.aoa.extensions.logDebug
  * @see InitialDelay.NONE
  *
  * @param delayCount Integer value used as initial delay
- * @param delayPeriodType Can either be "H" for Delay by X Hours, or "D" for Delay by X Days.
+ * @param delayPeriodType Can either be "DelayType.HOUR" for Delay by X Hours, or "DelayType.DAYS" for Delay by X Days.
  *
  */
 class InitialDelay(
