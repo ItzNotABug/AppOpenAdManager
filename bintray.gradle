@@ -1,0 +1,22 @@
+apply plugin: 'com.jfrog.bintray'
+
+version = '1.0'
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = 'Maven'
+        name = 'aoa_manager'
+        desc = 'A simple wrapper to handle the new AppOpenAds'
+        websiteUrl = 'https://github.com/ItzNotABug/AppOpenAdManager'
+        vcsUrl = 'https://github.com/ItzNotABug/AppOpenAdManager.git'
+        licenses = ["Apache-2.0"]
+        publish = true
+        publicDownloadNumbers = false
+    }
+}
