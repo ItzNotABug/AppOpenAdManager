@@ -10,7 +10,8 @@ All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
 `val latest_version`:\
-&nbsp; [![Download](https://api.bintray.com/packages/itznotabug/Maven/AppOpenAdManager/images/download.svg)](https://bintray.com/itznotabug/Maven/AppOpenAdManager/_latestVersion)
+&nbsp; [![Download](https://api.bintray.com/packages/itznotabug/Maven/AppOpenAdManager/images/download.svg)](https://bintray.com/itznotabug/Maven/AppOpenAdManager/_latestVersion)\
+
 **Gradle:**
 `implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
 
