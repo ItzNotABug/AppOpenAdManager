@@ -1,6 +1,30 @@
 apply plugin: 'com.jfrog.bintray'
 
-version = '1.0'
+version = '1.2'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set("sources")
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    setClasspath(project.files(android.getBootClasspath().join(File.pathSeparator)))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
+}
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
@@ -11,7 +35,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'Maven'
-        name = 'aoa_manager'
+        name = 'AppOpenAdManager'
         desc = 'A simple wrapper to handle the new AppOpenAds'
         websiteUrl = 'https://github.com/ItzNotABug/AppOpenAdManager'
         vcsUrl = 'https://github.com/ItzNotABug/AppOpenAdManager.git'

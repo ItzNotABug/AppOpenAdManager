@@ -10,7 +10,7 @@ install {
                 groupId 'com.lazygeniouz'
                 artifactId 'aoa_manager'
 
-                name 'houseAds'
+                name 'AppOpenAdManager'
                 description 'A simple wrapper to handle the new AppOpenAds'
                 url 'https://github.com/ItzNotABug/AppOpenAdManager'
 
