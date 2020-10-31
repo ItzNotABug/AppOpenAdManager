@@ -8,6 +8,22 @@ If you look at the [tutorial](https://developers.google.com/admob/android/app-op
 The wrapper should have been included in the core Ads SDK itself but it wasn't, So I ended up creating the wrapper!\
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
+## Dependency
+`val latest_version`:\
+&nbsp; [![Download](https://api.bintray.com/packages/itznotabug/Maven/AppOpenAdManager/images/download.svg)](https://bintray.com/itznotabug/Maven/AppOpenAdManager/_latestVersion)
+**Gradle:**
+`implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
+
+**Maven:**
+```maven
+<dependency>
+  <groupId>com.lazygeniouz</groupId>
+  <artifactId>aoa_manager</artifactId>
+  <version>$latest_version</version>
+  <type>pom</type>
+</dependency>
+```
+
 ## Usage
 **Kotlin:**
 ```kotlin
