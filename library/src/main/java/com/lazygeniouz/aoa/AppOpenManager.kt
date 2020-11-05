@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -18,39 +17,32 @@ import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.idelay.InitialDelay
 
 /**
- * @AppOpenManager = A class that handles all of the App Open Ad operations.
- *
- * Constructor arguments:
+ * [AppOpenManager]: A class that handles all of the App Open Ad operations.
  * @param application Required to keep a track of App's state.
- * @param adUnitId Pass your created AdUnitId
- * @param initialDelay for Initial Delay
- *
- * @param adRequest = Pass a customised AdRequest if you have any.
- * @see AdRequest
- *
- * @param orientation Ad's Orientation, Can be PORTRAIT or LANDSCAPE (Default is Portrait)
- * @see AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
- * @see AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE
- *
+ * @param configBundle A Data class to pass required arguments.
  */
-class AppOpenManager @JvmOverloads constructor(
+class AppOpenManager constructor(
     @NonNull application: Application,
-    @NonNull initialDelay: InitialDelay,
-    override var adUnitId: String = TEST_AD_UNIT_ID,
-    override var adRequest: AdRequest = AdRequest.Builder().build(),
-    override var orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
+    @NonNull private val configBundle: ConfigBundle
 ) : BaseManager(application),
     LifecycleObserver {
 
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        this.initialDelay = initialDelay
+        unpackBundle()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun onStart() {
         if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
         showAdIfAvailable()
+    }
+
+    private fun unpackBundle() {
+        this.initialDelay = configBundle.initialDelay
+        this.adRequest = configBundle.adRequest
+        this.adUnitId = configBundle.adUnitId
+        this.orientation = configBundle.orientation
     }
 
     // Let's fetch the Ad
@@ -65,11 +57,13 @@ class AppOpenManager @JvmOverloads constructor(
         if (!isShowingAd &&
             isAdAvailable() &&
             isInitialDelayOver()
-        ) appOpenAd?.show(
-            currentActivity,
-            getFullScreenContentCallback()
-        )
-        else {
+        ) {
+            // Show Ad Conditionally,
+            // If the passed activity class equals to the current activity, then show the Ad.
+            if (configBundle.showInActivity != null) {
+                if (currentActivity!!.javaClass.simpleName == configBundle.showInActivity.simpleName) showAd()
+            } else showAd()
+        } else {
             if (!isInitialDelayOver()) logDebug("The Initial Delay period is not over yet.")
 
             /**
@@ -85,13 +79,15 @@ class AppOpenManager @JvmOverloads constructor(
         }
     }
 
+    private fun showAd() = appOpenAd?.show(
+        currentActivity,
+        getFullScreenContentCallback()
+    )
 
     private fun loadAd() {
         // this is good for informing the user :)
         if (adUnitId == TEST_AD_UNIT_ID)
-            logDebug(
-                "Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production "
-            )
+            logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production")
 
         loadCallback = object : AppOpenAd.AppOpenAdLoadCallback() {
             override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
