@@ -2,6 +2,7 @@ package com.lazygeniouz.appopenads;
 
 import com.google.android.gms.ads.MobileAds;
 import com.lazygeniouz.aoa.AppOpenManager;
+import com.lazygeniouz.aoa.ConfigBundle;
 import com.lazygeniouz.aoa.idelay.InitialDelay;
 
 /**
@@ -16,6 +17,6 @@ public class AppJv extends android.app.Application {
         super.onCreate();
 
         MobileAds.initialize(this);
-        new AppOpenManager(AppJv.this, InitialDelay.NONE);
+        new AppOpenManager(AppJv.this, new ConfigBundle(InitialDelay.NONE));
     }
 }
