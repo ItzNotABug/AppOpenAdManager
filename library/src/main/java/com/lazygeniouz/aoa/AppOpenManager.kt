@@ -8,7 +8,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseManager
 import com.lazygeniouz.aoa.extensions.logDebug
@@ -19,30 +18,32 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
 /**
  * [AppOpenManager]: A class that handles all of the App Open Ad operations.
  * @param application Required to keep a track of App's state.
- * @param configBundle A Data class to pass required arguments.
+ * @param configs A Data class to pass required arguments.
  */
 class AppOpenManager constructor(
     @NonNull application: Application,
-    @NonNull private val configBundle: ConfigBundle
+    @NonNull private val configs: Configs
 ) : BaseManager(application),
     LifecycleObserver {
 
     init {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        unpackBundle()
+        addObserver()
+        unpackConfigs()
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun onStart() {
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    fun onStart() {
         if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
         showAdIfAvailable()
     }
 
-    private fun unpackBundle() {
-        this.initialDelay = configBundle.initialDelay
-        this.adRequest = configBundle.adRequest
-        this.adUnitId = configBundle.adUnitId
-        this.orientation = configBundle.orientation
+    private fun addObserver() = ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+    private fun unpackConfigs() {
+        this.initialDelay = configs.initialDelay
+        this.adRequest = configs.adRequest
+        this.adUnitId = configs.adUnitId
+        this.orientation = configs.orientation
     }
 
     // Let's fetch the Ad
@@ -60,16 +61,17 @@ class AppOpenManager constructor(
         ) {
             // Show Ad Conditionally,
             // If the passed activity class equals to the current activity, then show the Ad.
-            if (configBundle.showInActivity != null) {
-                if (currentActivity!!.javaClass.simpleName == configBundle.showInActivity.simpleName) showAd()
+            if (configs.showInActivity != null) {
+                if (currentActivity?.javaClass?.simpleName == configs.showInActivity.simpleName) showAd()
+                else logDebug("Current Activity does not match the Activity provided in Configs.showInActivity (${configs.showInActivity.simpleName})")
             } else showAd()
         } else {
             if (!isInitialDelayOver()) logDebug("The Initial Delay period is not over yet.")
 
             /**
-             *If the next session happens after the delay period is over
+             * If the next session happens after the delay period is over
              * & under 4 Hours, we can show a cached Ad.
-             * However the above will only work for DelayType.HOURS.
+             * However this will only work for DelayType.HOURS.
              */
             if (initialDelay.delayPeriodType != DelayType.DAYS ||
                 initialDelay.delayPeriodType == DelayType.DAYS &&
@@ -89,17 +91,6 @@ class AppOpenManager constructor(
         if (adUnitId == TEST_AD_UNIT_ID)
             logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production")
 
-        loadCallback = object : AppOpenAd.AppOpenAdLoadCallback() {
-            override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
-                this@AppOpenManager.appOpenAd = loadedAd
-                this@AppOpenManager.loadTime = getCurrentTime()
-                logDebug("Ad Loaded")
-            }
-
-            override fun onAppOpenAdFailedToLoad(loadError: LoadAdError) {
-                logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
-            }
-        }
         AppOpenAd.load(
             getApplication(),
             adUnitId, adRequest,
@@ -125,5 +116,9 @@ class AppOpenManager constructor(
                 isShowingAd = true
             }
         }
+    }
+
+    companion object {
+        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
     }
 }

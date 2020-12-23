@@ -4,7 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
+import com.lazygeniouz.aoa.AppOpenManager.Companion.TEST_AD_UNIT_ID
+import com.lazygeniouz.aoa.extensions.logDebug
+import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.InitialDelay
 import java.time.Instant
 import java.util.*
@@ -25,7 +29,18 @@ open class BaseManager(private val application: Application) :
 
     protected var isShowingAd = false
     protected var appOpenAd: AppOpenAd? = null
-    protected var loadCallback: AppOpenAd.AppOpenAdLoadCallback? = null
+    protected val loadCallback: AppOpenAd.AppOpenAdLoadCallback =
+        object : AppOpenAd.AppOpenAdLoadCallback() {
+            override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
+                appOpenAd = loadedAd
+                loadTime = getCurrentTime()
+                logDebug("Ad Loaded")
+            }
+
+            override fun onAppOpenAdFailedToLoad(loadError: LoadAdError) {
+                logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
+            }
+        }
 
     open var adUnitId: String = TEST_AD_UNIT_ID
     open var adRequest: AdRequest = AdRequest.Builder().build()

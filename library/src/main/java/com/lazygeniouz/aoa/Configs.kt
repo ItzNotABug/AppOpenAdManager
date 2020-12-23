@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.annotation.NonNull
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.appopen.AppOpenAd
-import com.lazygeniouz.aoa.base.BaseObserver
 import com.lazygeniouz.aoa.idelay.InitialDelay
 
 /**
@@ -17,9 +16,9 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
  * @param orientation Ad's Orientation, Can be PORTRAIT or LANDSCAPE (Default is Portrait)
  *
  */
-data class ConfigBundle @JvmOverloads constructor(
+data class Configs @JvmOverloads constructor(
     @NonNull val initialDelay: InitialDelay,
-    val adUnitId: String = BaseObserver.TEST_AD_UNIT_ID,
+    val adUnitId: String = AppOpenManager.TEST_AD_UNIT_ID,
     val adRequest: AdRequest = AdRequest.Builder().build(),
     val showInActivity: Class<out Activity>? = null,
     val orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
