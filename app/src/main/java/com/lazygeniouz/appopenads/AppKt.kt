@@ -5,7 +5,7 @@ package com.lazygeniouz.appopenads
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
 import com.lazygeniouz.aoa.AppOpenManager
-import com.lazygeniouz.aoa.ConfigBundle
+import com.lazygeniouz.aoa.Configs
 import com.lazygeniouz.aoa.idelay.InitialDelay
 import com.lazygeniouz.appopenads.activities.SplashActivity
 
@@ -21,10 +21,7 @@ class AppKt : Application() {
         MobileAds.initialize(this)
         AppOpenManager(
             this,
-            ConfigBundle(
-                InitialDelay.NONE,
-                showInActivity = SplashActivity::class.java
-            )
+            Configs(InitialDelay.NONE, showInActivity = SplashActivity::class.java)
         )
     }
 }
