@@ -29,33 +29,40 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
 ## Usage
 **Kotlin:**
 ```kotlin
-AppOpenManager(this, InitialDelay.NONE, adUnitId, adRequest, orientation)
+AppOpenManager.loadAppOpenAds(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
 ```
 
 **Java:**
 ```java
-new AppOpenManager(App.this, InitialDelay.NONE, adUnitId, adRequest, orientation);
+AppOpenManager.loadAppOpenAds(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
 ```
 
-The constructor arguments are:
+The static method `loadAppOpenAds`' arguments are:
 *   `@NonNull application: Application`\
      Your class extending `android.app.Application`
 
-*   `@NonNull initialDelay: InitialDelay`\
-     You can specify an **Initial Delay** to load & display the Ad for **the first time**.\
-     If you do not need a delay, simple pass `InitialDelay.NONE`\
-     But it is a good practise to allow the user to first explore the App &\
-     therefore 1 Day should be fine which is also the Default if you pass `InitialDelay()`
+*   `@NonNull configs: Configs`\
+     Now you can pass a `Configs` object which is a `data` class to pass relevant options.\
+     Relevant options are:
+     * `@NonNull initialDelay: InitialDelay`\
+        You can specify an **Initial Delay** to load & display the Ad for **the first time**.\
+        If you do not need a delay, simple pass `InitialDelay.NONE`\
+        But it is a good practise to allow the user to first explore the App &\
+        therefore 1 Day should be fine which is also the Default if you pass `InitialDelay()`
 
-*   `adUnitId: String`\
-     Your `adUnitId`\
-     (Optional for Testing) Default is a Test AdUnitId
+     * `adUnitId: String`\
+        Your `adUnitId`\
+        (Optional for Testing) Default is a Test AdUnitId
 
-*   `adRequest: AdRequest`\
-     (Optional) If you have a customised AdRequest
+     * `adRequest: AdRequest`\
+        (Optional) If you have a customised AdRequest
 
-*   `orientation: Int`\
-     (Optional) Default is `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
-     Available variables are:\
-     `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
-     `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
+     * `showInActivity: Class<out Activity>`\
+        (Optional) If you want to show the Ad only in a specific `Activity` (e.g: SplashActivity).\
+        See: [this issue](https://github.com/ItzNotABug/AppOpenAdManager/issues/5) & the Example App for more info.
+
+     * `orientation: Int`\
+        (Optional) Default is `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
+        Available variables are:\
+        `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
+        `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`

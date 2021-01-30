@@ -7,9 +7,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseManager
 import com.lazygeniouz.aoa.extensions.logDebug
@@ -18,40 +16,36 @@ import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.idelay.InitialDelay
 
 /**
- * @AppOpenManager = A class that handles all of the App Open Ad operations.
- *
- * Constructor arguments:
+ * [AppOpenManager]: A class that handles all of the App Open Ad operations.
  * @param application Required to keep a track of App's state.
- * @param adUnitId Pass your created AdUnitId
- * @param initialDelay for Initial Delay
- *
- * @param adRequest = Pass a customised AdRequest if you have any.
- * @see AdRequest
- *
- * @param orientation Ad's Orientation, Can be PORTRAIT or LANDSCAPE (Default is Portrait)
- * @see AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
- * @see AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE
- *
+ * @param configs A Data class to pass required arguments.
  */
-class AppOpenManager @JvmOverloads constructor(
+class AppOpenManager private constructor(
     @NonNull application: Application,
-    @NonNull initialDelay: InitialDelay,
-    override var adUnitId: String = TEST_AD_UNIT_ID,
-    override var adRequest: AdRequest = AdRequest.Builder().build(),
-    override var orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
+    @NonNull private val configs: Configs
 ) : BaseManager(application),
     LifecycleObserver {
 
     init {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        this.initialDelay = initialDelay
+        addObserver()
+        unpackConfigs()
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onStart() {
         if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
         showAdIfAvailable()
     }
+
+    private fun addObserver() = ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+    private fun unpackConfigs() =
+        apply {
+            initialDelay = configs.initialDelay
+            adRequest = configs.adRequest
+            adUnitId = configs.adUnitId
+            orientation = configs.orientation
+        }
 
     // Let's fetch the Ad
     private fun fetchAd() {
@@ -65,17 +59,20 @@ class AppOpenManager @JvmOverloads constructor(
         if (!isShowingAd &&
             isAdAvailable() &&
             isInitialDelayOver()
-        ) appOpenAd?.show(
-            currentActivity,
-            getFullScreenContentCallback()
-        )
-        else {
+        ) {
+            // Show Ad Conditionally,
+            // If the passed activity class equals to the current activity, then show the Ad.
+            if (configs.showInActivity != null) {
+                if (currentActivity?.javaClass?.simpleName == configs.showInActivity.simpleName) showAd()
+                else logDebug("Current Activity does not match the Activity provided in Configs.showInActivity (${configs.showInActivity.simpleName})")
+            } else showAd()
+        } else {
             if (!isInitialDelayOver()) logDebug("The Initial Delay period is not over yet.")
 
             /**
-             *If the next session happens after the delay period is over
+             * If the next session happens after the delay period is over
              * & under 4 Hours, we can show a cached Ad.
-             * However the above will only work for DelayType.HOURS.
+             * However this will only work for DelayType.HOURS.
              */
             if (initialDelay.delayPeriodType != DelayType.DAYS ||
                 initialDelay.delayPeriodType == DelayType.DAYS &&
@@ -85,30 +82,21 @@ class AppOpenManager @JvmOverloads constructor(
         }
     }
 
+    private fun showAd() = appOpenAd?.let { openAd ->
+        openAd.fullScreenContentCallback = getFullScreenContentCallback()
+        currentActivity?.let { activity -> openAd.show(activity) }
+    }
 
+    @Synchronized
     private fun loadAd() {
         // this is good for informing the user :)
         if (adUnitId == TEST_AD_UNIT_ID)
-            logDebug(
-                "Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production "
-            )
+            logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production")
 
-        loadCallback = object : AppOpenAd.AppOpenAdLoadCallback() {
-            override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
-                this@AppOpenManager.appOpenAd = loadedAd
-                this@AppOpenManager.loadTime = getCurrentTime()
-                logDebug("Ad Loaded")
-            }
-
-            override fun onAppOpenAdFailedToLoad(loadError: LoadAdError) {
-                logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
-            }
-        }
         AppOpenAd.load(
             getApplication(),
             adUnitId, adRequest,
-            orientation,
-            loadCallback
+            orientation, loadCallback
         )
     }
 
@@ -126,8 +114,24 @@ class AppOpenManager @JvmOverloads constructor(
             }
 
             override fun onAdShowedFullScreenContent() {
+                logDebug("Ad Shown")
                 isShowingAd = true
             }
         }
+    }
+
+    companion object {
+        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+
+        /**
+         * [loadAppOpenAds]: A static function that handles all of the App Open Ad operations.
+         * @param application Required to keep a track of App's state.
+         * @param configs A Data class to pass required arguments.
+         */
+        @JvmStatic
+        fun loadAppOpenAds(
+            @NonNull application: Application,
+            @NonNull configs: Configs
+        ) { AppOpenManager(application, configs) }
     }
 }
