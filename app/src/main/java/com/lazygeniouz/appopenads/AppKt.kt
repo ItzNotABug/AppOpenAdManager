@@ -19,7 +19,7 @@ class AppKt : Application() {
         super.onCreate()
 
         MobileAds.initialize(this)
-        AppOpenManager(
+        AppOpenManager.loadAppOpenAds(
             this,
             Configs(InitialDelay.NONE, showInActivity = SplashActivity::class.java)
         )
