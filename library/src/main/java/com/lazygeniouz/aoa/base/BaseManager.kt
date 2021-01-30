@@ -42,10 +42,10 @@ open class BaseManager(private val application: Application) :
             }
         }
 
-    open var adUnitId: String = TEST_AD_UNIT_ID
-    open var adRequest: AdRequest = AdRequest.Builder().build()
-    open var initialDelay: InitialDelay = InitialDelay()
-    open var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
+    protected var adUnitId: String = TEST_AD_UNIT_ID
+    protected var adRequest: AdRequest = AdRequest.Builder().build()
+    protected var initialDelay: InitialDelay = InitialDelay()
+    protected var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
 
     protected fun getApplication(): Application = application
 

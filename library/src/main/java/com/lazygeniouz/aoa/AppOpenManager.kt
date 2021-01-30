@@ -20,7 +20,7 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
  * @param application Required to keep a track of App's state.
  * @param configs A Data class to pass required arguments.
  */
-class AppOpenManager constructor(
+class AppOpenManager private constructor(
     @NonNull application: Application,
     @NonNull private val configs: Configs
 ) : BaseManager(application),
@@ -32,19 +32,20 @@ class AppOpenManager constructor(
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onStart() {
+    private fun onStart() {
         if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
         showAdIfAvailable()
     }
 
     private fun addObserver() = ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-    private fun unpackConfigs() {
-        this.initialDelay = configs.initialDelay
-        this.adRequest = configs.adRequest
-        this.adUnitId = configs.adUnitId
-        this.orientation = configs.orientation
-    }
+    private fun unpackConfigs() =
+        apply {
+            initialDelay = configs.initialDelay
+            adRequest = configs.adRequest
+            adUnitId = configs.adUnitId
+            orientation = configs.orientation
+        }
 
     // Let's fetch the Ad
     private fun fetchAd() {
@@ -81,11 +82,12 @@ class AppOpenManager constructor(
         }
     }
 
-    private fun showAd() = appOpenAd?.show(
-        currentActivity,
-        getFullScreenContentCallback()
-    )
+    private fun showAd() = appOpenAd?.let { openAd ->
+        openAd.fullScreenContentCallback = getFullScreenContentCallback()
+        currentActivity?.let { activity -> openAd.show(activity) }
+    }
 
+    @Synchronized
     private fun loadAd() {
         // this is good for informing the user :)
         if (adUnitId == TEST_AD_UNIT_ID)
@@ -94,8 +96,7 @@ class AppOpenManager constructor(
         AppOpenAd.load(
             getApplication(),
             adUnitId, adRequest,
-            orientation,
-            loadCallback
+            orientation, loadCallback
         )
     }
 
@@ -113,6 +114,7 @@ class AppOpenManager constructor(
             }
 
             override fun onAdShowedFullScreenContent() {
+                logDebug("Ad Shown")
                 isShowingAd = true
             }
         }
@@ -120,5 +122,16 @@ class AppOpenManager constructor(
 
     companion object {
         const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+
+        /**
+         * [loadAppOpenAds]: A static function that handles all of the App Open Ad operations.
+         * @param application Required to keep a track of App's state.
+         * @param configs A Data class to pass required arguments.
+         */
+        @JvmStatic
+        fun loadAppOpenAds(
+            @NonNull application: Application,
+            @NonNull configs: Configs
+        ) { AppOpenManager(application, configs) }
     }
 }
