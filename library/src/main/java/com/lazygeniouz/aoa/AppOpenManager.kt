@@ -51,7 +51,6 @@ class AppOpenManager private constructor(
     private fun fetchAd() {
         if (isAdAvailable()) return
         loadAd()
-        logDebug("A pre-cached Ad was not available, loading one.")
     }
 
     // Show the Ad if the conditions are met.
@@ -98,6 +97,8 @@ class AppOpenManager private constructor(
             adUnitId, adRequest,
             orientation, loadCallback
         )
+
+        logDebug("A pre-cached Ad was not available, loading one.")
     }
 
     // Handling the visibility of App Open Ad
@@ -132,6 +133,8 @@ class AppOpenManager private constructor(
         fun loadAppOpenAds(
             @NonNull application: Application,
             @NonNull configs: Configs
-        ) { AppOpenManager(application, configs) }
+        ) {
+            AppOpenManager(application, configs)
+        }
     }
 }

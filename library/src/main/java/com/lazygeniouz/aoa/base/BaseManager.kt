@@ -31,13 +31,13 @@ open class BaseManager(private val application: Application) :
     protected var appOpenAd: AppOpenAd? = null
     protected val loadCallback: AppOpenAd.AppOpenAdLoadCallback =
         object : AppOpenAd.AppOpenAdLoadCallback() {
-            override fun onAppOpenAdLoaded(loadedAd: AppOpenAd) {
+            override fun onAdLoaded(loadedAd: AppOpenAd) {
                 appOpenAd = loadedAd
                 loadTime = getCurrentTime()
                 logDebug("Ad Loaded")
             }
 
-            override fun onAppOpenAdFailedToLoad(loadError: LoadAdError) {
+            override fun onAdFailedToLoad(loadError: LoadAdError) {
                 logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
             }
         }
