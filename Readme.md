@@ -23,7 +23,7 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
   <groupId>com.lazygeniouz</groupId>
   <artifactId>aoa_manager</artifactId>
   <version>$latest_version</version>
-  <type>pom</type>
+  <type>aar</type>
 </dependency>
 ```
 
