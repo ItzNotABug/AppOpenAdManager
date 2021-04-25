@@ -4,8 +4,10 @@ package com.lazygeniouz.appopenads
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
-import com.lazygeniouz.aoa.AppOpenManager
+import com.lazygeniouz.aoa.configs.Configs
+import com.lazygeniouz.aoa.extensions.loadAppOpenAds
 import com.lazygeniouz.aoa.idelay.InitialDelay
+import com.lazygeniouz.appopenads.activities.SplashActivity
 
 /**
  * Sample App's Main Application
@@ -15,8 +17,13 @@ class AppKt : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        
+
         MobileAds.initialize(this)
-        AppOpenManager(this, InitialDelay.NONE)
+        loadAppOpenAds(
+            Configs(
+                InitialDelay.NONE,
+                showInActivities = arrayListOf(SplashActivity::class.java)
+            )
+        )
     }
 }
