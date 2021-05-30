@@ -84,7 +84,6 @@ class AppOpenAdManager private constructor(
                 initialDelay.delayPeriodType == DelayType.DAYS &&
                 isInitialDelayOver()
             ) fetchAd()
-
         }
     }
 
