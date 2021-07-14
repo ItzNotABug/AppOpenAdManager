@@ -20,7 +20,6 @@ import android.os.Bundle
  * Has a **noHistory** tag in Manifest for this Activity.
  */
 class SplashActivity : Activity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startActivity(Intent(this, MainActivity::class.java))
