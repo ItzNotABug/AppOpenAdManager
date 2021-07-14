@@ -9,7 +9,7 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`:**1.8.4**\
+`val latest_version`:**1.8.6**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
@@ -30,12 +30,12 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
 ## Usage
 **Kotlin:**
 ```kotlin
-AppOpenManager.loadAppOpenAds(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
+AppOpenManager.loadAppOpenAds(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation), listener)
 ```
 
 **Java:**
 ```java
-AppOpenManager.loadAppOpenAds(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
+AppOpenManager.loadAppOpenAds(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation), listener);
 ```
 
 The static method `loadAppOpenAds`' arguments are:
@@ -67,3 +67,10 @@ The static method `loadAppOpenAds`' arguments are:
         Available variables are:\
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
+
+*   `@Nullable listener: AppOpenAdListener`\
+     There are several callbacks with respect to the AppOpenAd's cycle.
+     * `onAdWillShow()` = Invoked before the Ad is shown, Ad is shown with a delay of at-least 750ms
+     * `onAdShown()` = Invoked when the Ad is shown
+     * `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
+     * `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
