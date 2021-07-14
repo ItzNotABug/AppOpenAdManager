@@ -8,6 +8,14 @@ import com.google.android.gms.ads.AdError
 interface AppOpenAdListener {
 
     /**
+     * Fired before the Ad is shown
+     *
+     * The Ad will be shown after a delay of a 750ms post this callback
+     * so that an action can be performed if needed before showing the Ad
+     */
+    fun onAdWillShow()
+
+    /**
      * Fired when the AppOpenAd is shown
      */
     fun onAdShown()

@@ -1,6 +1,7 @@
 package com.lazygeniouz.aoa
 
 import android.app.Application
+import android.os.Handler
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.lifecycle.Lifecycle
@@ -89,7 +90,15 @@ class AppOpenAdManager private constructor(
 
     private fun showAd() = appOpenAd?.let { openAd ->
         openAd.fullScreenContentCallback = getFullScreenContentCallback()
-        currentActivity?.let { activity -> openAd.show(activity) }
+        currentActivity?.let { activity ->
+            if (listener != null) {
+                listener.onAdWillShow()
+                    .also {
+                        Handler(activity.mainLooper)
+                            .postDelayed({ openAd.show(activity) }, 750)
+                    }
+            } else openAd.show(activity)
+        }
     }
 
     @Synchronized
@@ -144,8 +153,6 @@ class AppOpenAdManager private constructor(
             @NonNull application: Application,
             @NonNull configs: Configs,
             @Nullable listener: AppOpenAdListener? = null
-        ) {
-            AppOpenAdManager(application, configs, listener)
-        }
+        ) = AppOpenAdManager(application, configs, listener)
     }
 }
