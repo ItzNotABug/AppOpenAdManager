@@ -24,6 +24,7 @@ class AppKt : Application() {
         loadAppOpenAds(
             Configs(
                 InitialDelay.NONE,
+                showAdOnFirstColdStart = true,
                 showInActivities = arrayListOf(SplashActivity::class.java)
             ),
             object : AppOpenAdListener {

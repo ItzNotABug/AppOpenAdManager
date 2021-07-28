@@ -9,7 +9,7 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`:**1.8.6**\
+`val latest_version`:**1.8.8**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
@@ -58,8 +58,12 @@ The static method `loadAppOpenAds`' arguments are:
      * `adRequest: AdRequest`\
         (Optional) If you have a customised AdRequest
 
-     * `showInActivity: Class<out Activity>`\
-        (Optional) If you want to show the Ad only in a specific `Activity` (e.g: SplashActivity).\
+     * `showAdOnFirstColdStart: Boolean`\
+        (Optional) Show Ad as soon as it load on the first Cold start if true,
+        this will ignore the Activities passed in the [showInActivities]
+
+     * `showInActivities: Class<out Activity>`\
+        (Optional) If you want to show the Ad only in specific Activities (e.g: SplashActivity).\
         See: [this issue](https://github.com/ItzNotABug/AppOpenAdManager/issues/5) & the Example App for more info.
 
      * `orientation: Int`\
