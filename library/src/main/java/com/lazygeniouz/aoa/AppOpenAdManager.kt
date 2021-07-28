@@ -29,12 +29,13 @@ class AppOpenAdManager private constructor(
     @NonNull application: Application,
     @NonNull private val configs: Configs,
     @Nullable private val listener: AppOpenAdListener?
-) : BaseManager(application),
+) : BaseManager(application, configs),
     LifecycleObserver {
 
     init {
         addObserver()
         unpackConfigs()
+        attachColdStartListener()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -52,6 +53,8 @@ class AppOpenAdManager private constructor(
             adUnitId = configs.adUnitId
             orientation = configs.orientation
         }
+
+    private fun attachColdStartListener() = apply { coldShowListener = { showAd() } }
 
     // Let's fetch the Ad
     private fun fetchAd() {
@@ -92,11 +95,10 @@ class AppOpenAdManager private constructor(
         openAd.fullScreenContentCallback = getFullScreenContentCallback()
         currentActivity?.let { activity ->
             if (listener != null) {
-                listener.onAdWillShow()
-                    .also {
-                        Handler(activity.mainLooper)
-                            .postDelayed({ openAd.show(activity) }, 750)
-                    }
+                listener.onAdWillShow().also {
+                    Handler(activity.mainLooper)
+                        .postDelayed({ openAd.show(activity) }, 750)
+                }
             } else openAd.show(activity)
         }
     }

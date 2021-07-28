@@ -10,9 +10,9 @@ import com.lazygeniouz.aoa.listener.AppOpenAdListener
 
 internal const val TAG = "AppOpenManager"
 
-internal fun logDebug(message: String) = Log.d(TAG, message)
+internal fun logDebug(message: Any) = Log.d(TAG, message.toString())
 
-internal fun logError(message: String) = Log.e(TAG, message)
+internal fun logError(message: Any) = Log.e(TAG, message.toString())
 
 
 /**

@@ -3,10 +3,12 @@ package com.lazygeniouz.aoa.base
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import androidx.annotation.Nullable
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.AppOpenAdManager.Companion.TEST_AD_UNIT_ID
+import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.InitialDelay
@@ -21,13 +23,19 @@ import java.util.*
  * so that our main usable class does not have a lot of methods and variables.
  * @see com.lazygeniouz.aoa.AppOpenAdManager
  */
-open class BaseManager(private val application: Application) :
-    BaseObserver(application) {
+open class BaseManager(
+    private val application: Application,
+    private val configs: Configs
+) : BaseObserver(application) {
 
     private val sharedPreferences =
         application.getSharedPreferences("appOpenAdsManager", Context.MODE_PRIVATE)
 
+    @Nullable
+    protected var coldShowListener: (() -> Unit)? = null
+
     protected var isShowingAd = false
+    protected var coldStartShown = false
     protected var appOpenAd: AppOpenAd? = null
     protected val loadCallback: AppOpenAd.AppOpenAdLoadCallback =
         object : AppOpenAd.AppOpenAdLoadCallback() {
@@ -35,6 +43,11 @@ open class BaseManager(private val application: Application) :
                 appOpenAd = loadedAd
                 loadTime = getCurrentTime()
                 logDebug("Ad Loaded")
+
+                if (!coldStartShown && configs.showAdOnFirstColdStart) {
+                    coldShowListener?.invoke()
+                    coldStartShown = true
+                }
             }
 
             override fun onAdFailedToLoad(loadError: LoadAdError) {
