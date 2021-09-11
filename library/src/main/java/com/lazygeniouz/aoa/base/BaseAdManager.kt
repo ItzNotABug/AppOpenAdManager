@@ -1,5 +1,6 @@
 package com.lazygeniouz.aoa.base
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.Build
@@ -23,7 +24,7 @@ import java.util.*
  * so that our main usable class does not have a lot of methods and variables.
  * @see com.lazygeniouz.aoa.AppOpenAdManager
  */
-open class BaseManager(
+open class BaseAdManager(
     private val application: Application,
     private val configs: Configs
 ) : BaseObserver(application) {
@@ -56,8 +57,8 @@ open class BaseManager(
         }
 
     protected var adUnitId: String = TEST_AD_UNIT_ID
-    protected var adRequest: AdRequest = AdRequest.Builder().build()
     protected var initialDelay: InitialDelay = InitialDelay()
+    protected var adRequest: AdRequest = AdRequest.Builder().build()
     protected var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
 
     protected fun getApplication(): Application = application
@@ -65,37 +66,45 @@ open class BaseManager(
     // SharedPreferences keep a better track
     protected var loadTime: Long
         get() = sharedPreferences.getLong("lastTime", 0)
-        set(value) = sharedPreferences.edit().putLong("lastTime", value).apply()
+        @SuppressLint("CommitPrefEdits")
+        set(value) = sharedPreferences.edit()
+            .putLong("lastTime", value)
+            .apply()
 
     /**
      * There's a platform issue on Android 8/8.1 when using Date().time
-     * Details: https://justanotherdeveloper.in/blog/short_standard_assertion_error/
+     * Details: https://itznotabug.dev/blog/short_standard_assertion_error/
      */
     protected fun getCurrentTime(): Long {
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) Date().time
         else Instant.now().toEpochMilli()
     }
 
+    @SuppressLint("CommitPrefEdits")
     protected fun saveInitialDelayTime() {
         val initialDelayKey = "savedDelay"
         val savedDelay = sharedPreferences.getLong(initialDelayKey, 0L)
-        if (savedDelay == 0L) sharedPreferences.edit().putLong(initialDelayKey, getCurrentTime())
-            .apply()
+        if (savedDelay == 0L)
+            sharedPreferences.edit()
+                .putLong(initialDelayKey, getCurrentTime())
+                .apply()
     }
 
-    // The documentation says that the Ads are only cached for 4 Hours.
+    /**
+     * The documentation says that the Ads are only cached for 4 Hours.
+     * https://developers.google.com/admob/android/app-open#expiration
+     */
     private fun notLongerThanFourHours(): Boolean {
         val dateDifference = getCurrentTime() - loadTime
         val fourHours: Long = (3600000 * 4)
         return dateDifference < fourHours
     }
 
-    // Returns `true` if an Ad is available & valid,
-    // `false` otherwise.
+    // Returns `true` if an Ad is available & valid, `false` otherwise.
     protected fun isAdAvailable(): Boolean = (appOpenAd != null) && notLongerThanFourHours()
 
-    // difference = Current Time `minus` Saved Time
-    // therefore, difference >= duration.getTime()
+    // Difference = Current Time `minus` Saved Time,
+    // therefore difference >= duration.getTime()
     protected fun isInitialDelayOver(): Boolean {
         val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
         return (getCurrentTime() - savedDelay) >= initialDelay.getTime()

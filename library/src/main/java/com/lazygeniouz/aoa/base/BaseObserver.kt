@@ -13,7 +13,7 @@ import android.os.Bundle
  * to add all those abstract methods in a single class.
  *
  * Extended ahead by:
- * @see BaseManager
+ * @see BaseAdManager
  */
 open class BaseObserver(application: Application) :
     Application.ActivityLifecycleCallbacks {
@@ -40,9 +40,8 @@ open class BaseObserver(application: Application) :
 
     override fun onActivityDestroyed(activity: Activity) {
         // this is required for [Configs.showAdOnFirstColdStart]
-        if (currentActivity?.javaClass?.simpleName
-                .equals(activity.javaClass.simpleName)
-        ) currentActivity = null
+        if (currentActivity?.javaClass?.simpleName.equals(activity.javaClass.simpleName))
+            currentActivity = null
     }
 
     override fun onActivityPaused(activity: Activity) {}

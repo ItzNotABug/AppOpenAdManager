@@ -11,7 +11,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.appopen.AppOpenAd
-import com.lazygeniouz.aoa.base.BaseManager
+import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
@@ -29,7 +29,7 @@ class AppOpenAdManager private constructor(
     @NonNull application: Application,
     @NonNull private val configs: Configs,
     @Nullable private val listener: AppOpenAdListener?
-) : BaseManager(application, configs),
+) : BaseAdManager(application, configs),
     LifecycleObserver {
 
     init {
@@ -92,6 +92,11 @@ class AppOpenAdManager private constructor(
     }
 
     private fun showAd() = appOpenAd?.let { openAd ->
+        if (configs.showOnCondition?.invoke() == false) {
+            logDebug("Configs.showOnCondition lambda returned false, Ad will not be shown")
+            return@let
+        }
+
         openAd.fullScreenContentCallback = getFullScreenContentCallback()
         currentActivity?.let { activity ->
             if (listener != null) {
@@ -107,7 +112,7 @@ class AppOpenAdManager private constructor(
     private fun loadAd() {
         // this is good for informing the user :)
         if (adUnitId == TEST_AD_UNIT_ID)
-            logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production")
+            logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production.")
 
         AppOpenAd.load(
             getApplication(),
@@ -130,7 +135,7 @@ class AppOpenAdManager private constructor(
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
                 listener?.onAdShowFailed(adError)
-                logError("AppOpenAd failed To Show Full-Screen Content: ${adError?.message}")
+                logError("AppOpenAd failed To show Full-Screen Content: ${adError?.message}")
             }
 
             override fun onAdShowedFullScreenContent() {
