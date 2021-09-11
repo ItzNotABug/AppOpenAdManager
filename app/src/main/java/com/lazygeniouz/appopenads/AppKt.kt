@@ -24,7 +24,10 @@ class AppKt : Application() {
         loadAppOpenAds(
             Configs(
                 InitialDelay.NONE,
-                showAdOnFirstColdStart = true,
+                // some condition lambda func. that returns a boolean
+                // Ad will ONLY SHOW if the block returns `true`
+                showOnCondition = { true },
+                showAdOnFirstColdStart = false,
                 showInActivities = arrayListOf(SplashActivity::class.java)
             ),
             object : AppOpenAdListener {
