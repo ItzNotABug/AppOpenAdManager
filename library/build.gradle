@@ -4,15 +4,24 @@ plugins {
     id 'kotlin-android'
 }
 
+allprojects {
+    plugins.withId("com.vanniktech.maven.publish") {
+        mavenPublish {
+            sonatypeHost = "S01"
+        }
+    }
+}
+
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 188
-        versionName "1.8.8"
+        targetSdkVersion 31
+
+        versionCode 200
+        versionName "2.0"
     }
 
     buildTypes {
@@ -34,7 +43,7 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'com.google.android.gms:play-services-ads:20.2.0'
+    implementation 'com.google.android.gms:play-services-ads:20.3.0'
 
     implementation "androidx.lifecycle:lifecycle-process:2.3.1"
     annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.3.1"
