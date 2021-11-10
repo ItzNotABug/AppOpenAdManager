@@ -4,8 +4,6 @@ import android.app.Application;
 
 import com.google.android.gms.ads.MobileAds;
 import com.lazygeniouz.aoa.AppOpenAdManager;
-import com.lazygeniouz.aoa.configs.Configs;
-import com.lazygeniouz.aoa.idelay.InitialDelay;
 
 /**
  * Sample App's Main Application
@@ -19,6 +17,7 @@ public class AppJv extends Application {
         super.onCreate();
 
         MobileAds.initialize(this);
-        AppOpenAdManager.loadAppOpenAds(AppJv.this, new Configs(InitialDelay.NONE));
+        AppOpenAdManager manager = AppOpenAdManager.get(this);
+        manager.loadAppOpenAd();
     }
 }
