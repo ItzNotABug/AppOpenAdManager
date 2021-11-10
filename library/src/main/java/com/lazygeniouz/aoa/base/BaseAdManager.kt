@@ -1,10 +1,13 @@
 package com.lazygeniouz.aoa.base
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.annotation.Nullable
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -13,8 +16,10 @@ import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.InitialDelay
+import com.lazygeniouz.aoa.listener.AppOpenAdListener
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * A Base class that extends
@@ -24,30 +29,47 @@ import java.util.*
  * so that our main usable class does not have a lot of methods and variables.
  * @see com.lazygeniouz.aoa.AppOpenAdManager
  */
-open class BaseAdManager(
+abstract class BaseAdManager(
     private val application: Application,
     private val configs: Configs
-) : BaseObserver(application) {
+) : BaseObserver(application),
+    LifecycleEventObserver {
 
-    private val sharedPreferences =
+    private var isFirst = true
+    private var isLifecycleAttached = false
+    private val processLifecycle by lazy { ProcessLifecycleOwner.get().lifecycle }
+
+    private val sharedPreferences by lazy {
         application.getSharedPreferences("appOpenAdsManager", Context.MODE_PRIVATE)
+    }
+
+    // Callbacks
+    @Nullable
+    protected var listener: AppOpenAdListener? = null
 
     @Nullable
     protected var coldShowListener: (() -> Unit)? = null
 
     protected var isShowingAd = false
     protected var coldStartShown = false
-    protected var appOpenAd: AppOpenAd? = null
+
+    @Volatile
+    protected var appOpenAdInstance: AppOpenAd? = null
     protected val loadCallback: AppOpenAd.AppOpenAdLoadCallback =
         object : AppOpenAd.AppOpenAdLoadCallback() {
             override fun onAdLoaded(loadedAd: AppOpenAd) {
-                appOpenAd = loadedAd
+                appOpenAdInstance = loadedAd
                 loadTime = getCurrentTime()
                 logDebug("Ad Loaded")
 
                 if (!coldStartShown && configs.showAdOnFirstColdStart) {
                     coldShowListener?.invoke()
                     coldStartShown = true
+                }
+
+                if (!isLifecycleAttached) {
+                    isLifecycleAttached = true
+                    processLifecycle.addObserver(this@BaseAdManager)
                 }
             }
 
@@ -66,45 +88,71 @@ open class BaseAdManager(
     // SharedPreferences keep a better track
     protected var loadTime: Long
         get() = sharedPreferences.getLong("lastTime", 0)
-        @SuppressLint("CommitPrefEdits")
         set(value) = sharedPreferences.edit()
             .putLong("lastTime", value)
             .apply()
 
     /**
-     * There's a platform issue on Android 8/8.1 when using Date().time
-     * Details: https://itznotabug.dev/blog/short_standard_assertion_error/
+     * `onResume` will be fired when the lifecycle event for **ON_RESUME** is triggered.
+     *
+     * This is required to avoid the first trigger to **ON_RESUME** which might show / load the ad,
+     * when it is not supposed to.
+     */
+    abstract fun onResume()
+
+    /**
+     * State observer callback to handle relevant operations.
+     */
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        if (event == Lifecycle.Event.ON_RESUME) {
+            if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
+            if (!isFirst) onResume()
+            else isFirst = false
+        }
+    }
+
+    /**
+     * There's a platform issue on Android 8/8.1 when using `Date().time`
+     *
+     * Details: [https://itznotabug.dev/blog/short_standard_assertion_error/]
      */
     protected fun getCurrentTime(): Long {
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) Date().time
         else Instant.now().toEpochMilli()
     }
 
-    @SuppressLint("CommitPrefEdits")
-    protected fun saveInitialDelayTime() {
+    private fun saveInitialDelayTime() {
         val initialDelayKey = "savedDelay"
         val savedDelay = sharedPreferences.getLong(initialDelayKey, 0L)
-        if (savedDelay == 0L)
-            sharedPreferences.edit()
-                .putLong(initialDelayKey, getCurrentTime())
-                .apply()
+        if (savedDelay != 0L) return
+        sharedPreferences.edit()
+            .putLong(initialDelayKey, getCurrentTime())
+            .apply()
     }
 
     /**
      * The documentation says that the Ads are only cached for 4 Hours.
-     * https://developers.google.com/admob/android/app-open#expiration
+     *
+     * [https://developers.google.com/admob/android/app-open#expiration]
      */
     private fun notLongerThanFourHours(): Boolean {
         val dateDifference = getCurrentTime() - loadTime
-        val fourHours: Long = (3600000 * 4)
+        val fourHours: Long = TimeUnit.HOURS.toMillis(4)
         return dateDifference < fourHours
     }
 
-    // Returns `true` if an Ad is available & valid, `false` otherwise.
-    protected fun isAdAvailable(): Boolean = (appOpenAd != null) && notLongerThanFourHours()
+    /**
+     * Returns `true` if an Ad is available & valid, `false` otherwise.
+     */
+    open fun isAdAvailable(): Boolean {
+        return (appOpenAdInstance != null) && notLongerThanFourHours()
+    }
 
-    // Difference = Current Time `minus` Saved Time,
-    // therefore difference >= duration.getTime()
+    /**
+     * Difference = Current Time `minus` Saved Time,
+     *
+     * therefore difference >= duration.getTime()
+     */
     protected fun isInitialDelayOver(): Boolean {
         val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
         return (getCurrentTime() - savedDelay) >= initialDelay.getTime()

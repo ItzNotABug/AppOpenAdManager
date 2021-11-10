@@ -9,7 +9,7 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`:**2.0**\
+`val latest_version`:**2.2-snapshot**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
@@ -30,20 +30,22 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
 ## Usage
 **Kotlin:**
 ```kotlin
-AppOpenManager.loadAppOpenAds(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation), listener)
+val adManager = AppOpenManager.get(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
+adManager.loadAppOpenAd(listener)
 ```
 
 **Java:**
 ```java
-AppOpenManager.loadAppOpenAds(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation), listener);
+AppOpenManager adManager = AppOpenManager.get(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
+adManager.loadAppOpenAd(listener)
 ```
 
-The static method `loadAppOpenAds`' arguments are:
+The arguments for the static method `get` are:
 *   `@NonNull application: Application`\
      Your class extending `android.app.Application`
 
-*   `@NonNull configs: Configs`\
-     Now you can pass a `Configs` object which is a `data` class to pass relevant options.\
+*   `@NonNull configs: Configs` (Optional)\
+     You can pass a `Configs` object which is a `data` class to pass relevant options.\
      Relevant options are:
      * `@NonNull initialDelay: InitialDelay`\
         You can specify an **Initial Delay** to load & display the Ad for **the first time**.\
@@ -76,9 +78,14 @@ The static method `loadAppOpenAds`' arguments are:
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
 
-*   `@Nullable listener: AppOpenAdListener`\
-     There are several callbacks with respect to the AppOpenAd's cycle.
-     * `onAdWillShow()` = Invoked before the Ad is shown, Ad is shown with a delay of at-least 750ms
-     * `onAdShown()` = Invoked when the Ad is shown
-     * `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
-     * `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
+The `loadAppOpenAd` has an optional `listener: AppOpenAdListener` parameter:\
+There are several callbacks with respect to the AppOpenAd.
+* `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
+* `onAdShown()` = Invoked when the Ad is shown
+* `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
+* `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
+
+Other available methods:
+* `getAppOpenAd: AppOpenAd?`: Returns the `AppOpenAd` instance, can be null.
+* `isAdAvailable(): Boolean`: Returns `true` if a valid `AppOpenAd` is available
+* `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.

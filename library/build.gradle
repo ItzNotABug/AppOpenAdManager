@@ -43,8 +43,8 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'com.google.android.gms:play-services-ads:20.3.0'
+    implementation 'com.google.android.gms:play-services-ads:20.4.0'
 
-    implementation "androidx.lifecycle:lifecycle-process:2.3.1"
-    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.3.1"
+    implementation "androidx.lifecycle:lifecycle-process:2.4.0"
+    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.4.0"
 }
