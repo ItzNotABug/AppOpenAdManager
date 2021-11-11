@@ -35,9 +35,7 @@ abstract class BaseAdManager(
 ) : BaseObserver(application),
     LifecycleEventObserver {
 
-    private var isFirst = true
-    private var isLifecycleAttached = false
-    private val processLifecycle by lazy { ProcessLifecycleOwner.get().lifecycle }
+    init { addObserver() }
 
     private val sharedPreferences by lazy {
         application.getSharedPreferences("appOpenAdsManager", Context.MODE_PRIVATE)
@@ -50,6 +48,7 @@ abstract class BaseAdManager(
     @Nullable
     protected var coldShowListener: (() -> Unit)? = null
 
+    protected var isLoading = false
     protected var isShowingAd = false
     protected var coldStartShown = false
 
@@ -62,20 +61,20 @@ abstract class BaseAdManager(
                 loadTime = getCurrentTime()
                 logDebug("Ad Loaded")
 
-                if (!coldStartShown && configs.showAdOnFirstColdStart) {
+                if (!coldStartShown
+                    && configs.showAdOnFirstColdStart
+                    && isInitialDelayOver()
+                ) {
                     coldShowListener?.invoke()
                     coldStartShown = true
                 }
 
-                if (!isLifecycleAttached) {
-                    isLifecycleAttached = true
-                    processLifecycle.addObserver(this@BaseAdManager)
-                }
-
                 listener?.onAdLoaded()
+                isLoading = false
             }
 
             override fun onAdFailedToLoad(loadError: LoadAdError) {
+                isLoading = false
                 listener?.onAdFailedToLoad(loadError)
                 logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
             }
@@ -95,11 +94,12 @@ abstract class BaseAdManager(
             .putLong("lastTime", value)
             .apply()
 
+    private fun addObserver() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this@BaseAdManager)
+    }
+
     /**
      * `onResume` will be fired when the lifecycle event for **ON_RESUME** is triggered.
-     *
-     * This is required to avoid the first trigger to **ON_RESUME** which might show / load the ad,
-     * when it is not supposed to.
      */
     abstract fun onResume()
 
@@ -107,11 +107,8 @@ abstract class BaseAdManager(
      * State observer callback to handle relevant operations.
      */
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-        if (event == Lifecycle.Event.ON_RESUME) {
-            if (initialDelay != InitialDelay.NONE) saveInitialDelayTime()
-            if (!isFirst) onResume()
-            else isFirst = false
-        }
+        if (event == Lifecycle.Event.ON_RESUME) onResume()
+        if (event == Lifecycle.Event.ON_START && initialDelay != InitialDelay.NONE) saveInitialDelayTime()
     }
 
     /**
@@ -147,7 +144,7 @@ abstract class BaseAdManager(
     /**
      * Returns `true` if an Ad is available & valid, `false` otherwise.
      */
-    open fun isAdAvailable(): Boolean {
+    protected fun isAdAvailableInternal(): Boolean {
         return (appOpenAdInstance != null) && notLongerThanFourHours()
     }
 
@@ -158,6 +155,8 @@ abstract class BaseAdManager(
      */
     protected fun isInitialDelayOver(): Boolean {
         val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
-        return (getCurrentTime() - savedDelay) >= initialDelay.getTime()
+        // Zero means first load & it shouldn't be marked as ad available,
+        // so we flag that as well as a false value boolean for this specific condition.
+        return savedDelay != 0L && (getCurrentTime() - savedDelay) >= initialDelay.getTime()
     }
 }

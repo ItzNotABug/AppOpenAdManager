@@ -10,10 +10,12 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
+import com.lazygeniouz.aoa.extensions.isClientOnline
 import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
+import java.util.concurrent.TimeUnit
 
 /**
  * [AppOpenAdManager]: A class that handles all of the App Open Ad operations.
@@ -33,19 +35,20 @@ class AppOpenAdManager private constructor(
     /**
      * Returns true if an **AppOpenAd** is available
      */
-    override fun isAdAvailable(): Boolean {
-        return !isShowingAd && super.isAdAvailable() && isInitialDelayOver()
+    private fun isAdAvailable(): Boolean {
+        return !isShowingAd && isAdAvailableInternal() && isInitialDelayOver()
     }
 
     /**
      * Load Ad & optionally attach a listener.
      */
     fun loadAppOpenAd() {
+        if (!isInitialDelayOver()) return
         fetchAd()
     }
 
     /**
-     * Assign a listener tp observe AppOpenAd events.
+     * Assign a listener to observe AppOpenAd events.
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
     fun setAppOpenAdListener(@NonNull adListener: AppOpenAdListener) = apply {
@@ -100,16 +103,18 @@ class AppOpenAdManager private constructor(
             } else showAd()
         } else {
             if (!isInitialDelayOver()) logDebug("The Initial Delay period is not over yet.")
+            else {
 
-            /**
-             * If the next session happens after the delay period is over
-             * & under 4 Hours, we can show a cached Ad.
-             * However this will only work for DelayType.HOURS.
-             */
-            if (initialDelay.delayPeriodType != DelayType.DAYS ||
-                initialDelay.delayPeriodType == DelayType.DAYS &&
-                isInitialDelayOver()
-            ) fetchAd()
+                /**
+                 * If the next session happens after the delay period is over
+                 * & under 4 Hours, we can show a cached Ad.
+                 * However this will only work for DelayType.HOURS.
+                 */
+                if (initialDelay.delayPeriodType != DelayType.DAYS ||
+                    initialDelay.delayPeriodType == DelayType.DAYS &&
+                    isInitialDelayOver()
+                ) fetchAd()
+            }
         }
     }
 
@@ -124,17 +129,22 @@ class AppOpenAdManager private constructor(
             if (listener != null) {
                 listener?.onAdWillShow().also {
                     Handler(activity.mainLooper)
-                        .postDelayed({ openAd.show(activity) }, 1000L)
+                        .postDelayed({ openAd.show(activity) }, TimeUnit.SECONDS.toMillis(1))
                 }
             } else openAd.show(activity)
         }
     }
 
-    @Synchronized
     private fun loadAd() {
+        if (isLoading) return
+        else isLoading = true
+
         // this is good for informing the user :)
         if (adUnitId == TEST_AD_UNIT_ID)
             logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production.")
+
+        if (!getApplication().isClientOnline())
+            logError("There is no active internet connection, calls to loading the Ad will fail.")
 
         AppOpenAd.load(
             getApplication(),

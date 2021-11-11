@@ -29,6 +29,11 @@ data class Configs @JvmOverloads constructor(
     val orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
 ) {
     companion object {
+
+        /**
+         * Should **only be used for testing** as the
+         * default parameter values are not meant for Production use.
+         */
         @JvmField
         val DEFAULT = Configs()
     }

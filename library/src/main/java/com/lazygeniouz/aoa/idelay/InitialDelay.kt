@@ -1,6 +1,7 @@
 package com.lazygeniouz.aoa.idelay
 
 import com.lazygeniouz.aoa.extensions.logDebug
+import java.util.concurrent.TimeUnit
 
 /**
  * Allowing the developer to have an initial delay for showing the Ad after the app is first installed.
@@ -30,14 +31,14 @@ class InitialDelay(
     }
 
 
-    internal fun getTime(): Int {
-        val oneHourInMillis = 3600000
-        val periodTypeToMillis =
-            when (delayPeriodType) {
-                DelayType.DAYS -> (oneHourInMillis * 24)
-                DelayType.HOUR -> oneHourInMillis
-                else -> 0
-            }
+    internal fun getTime(): Long {
+        val periodTypeToMillis = when (delayPeriodType) {
+            DelayType.DAYS -> TimeUnit.DAYS.toMillis(1)
+            DelayType.HOURS -> TimeUnit.HOURS.toMillis(1)
+            DelayType.MINUTES -> TimeUnit.MINUTES.toMillis(1)
+            DelayType.SECONDS -> TimeUnit.SECONDS.toMillis(1)
+            else -> 0
+        }
         return (delayCount * periodTypeToMillis)
     }
 
