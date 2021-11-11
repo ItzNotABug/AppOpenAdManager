@@ -26,7 +26,9 @@ class AppKt : Application() {
                 InitialDelay.NONE,
                 showInActivities = arrayListOf(SplashActivity::class.java),
             )
-        ).loadAppOpenAd(object : AppOpenAdListener {
+        ).loadAppOpenAd(object : AppOpenAdListener() {
+            override fun onAdLoaded() = println("AppOpenAdListener#onAdLoaded")
+
             override fun onAdWillShow() = println("AppOpenAdListener#onAdWillShow")
 
             override fun onAdShown() = println("AppOpenAdListener#onAdShown")
