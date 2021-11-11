@@ -3,7 +3,6 @@
 package com.lazygeniouz.appopenads
 
 import android.app.Application
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.MobileAds
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.getAppOpenAdManager
@@ -26,18 +25,10 @@ class AppKt : Application() {
                 InitialDelay.NONE,
                 showInActivities = arrayListOf(SplashActivity::class.java),
             )
-        ).loadAppOpenAd(object : AppOpenAdListener() {
-            override fun onAdLoaded() = println("AppOpenAdListener#onAdLoaded")
-
-            override fun onAdWillShow() = println("AppOpenAdListener#onAdWillShow")
-
+        ).setAppOpenAdListener(object : AppOpenAdListener() {
             override fun onAdShown() = println("AppOpenAdListener#onAdShown")
-
-            override fun onAdDismissed() = println("AppOpenAdListener#onAdDismissed")
-
-            override fun onAdShowFailed(error: AdError?) =
-                println("AppOpenAdListener#onAdShowFailed(${error?.message})")
-
-        })
+            override fun onAdLoaded() = println("AppOpenAdListener#onAdLoaded")
+            override fun onAdWillShow() = println("AppOpenAdListener#onAdWillShow")
+        }).loadAppOpenAd()
     }
 }
