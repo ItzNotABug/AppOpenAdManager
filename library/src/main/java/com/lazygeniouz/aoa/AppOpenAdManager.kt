@@ -46,7 +46,7 @@ class AppOpenAdManager private constructor(
      * Assign a listener tp observe AppOpenAd events.
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
-    fun setAppOpenAdListener(@NonNull adListener: AppOpenAdListener) {
+    fun setAppOpenAdListener(@NonNull adListener: AppOpenAdListener) = apply {
         if (listener == null) this.listener = adListener
     }
 
@@ -68,7 +68,10 @@ class AppOpenAdManager private constructor(
         return this.listener
     }
 
-    override fun onResume() = showAdIfAvailable()
+    override fun onResume() {
+        logDebug("ON_RESUME")
+        showAdIfAvailable()
+    }
 
     private fun unpackConfigs() = apply {
         initialDelay = configs.initialDelay

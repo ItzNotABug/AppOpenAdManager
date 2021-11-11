@@ -21,7 +21,7 @@ android {
         targetSdkVersion 31
 
         versionCode 203
-        versionName "2.2-alpha02"
+        versionName "2.2-alpha03"
     }
 
     buildTypes {
@@ -46,5 +46,4 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:20.4.0'
 
     implementation "androidx.lifecycle:lifecycle-process:2.4.0"
-    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.4.0"
 }
