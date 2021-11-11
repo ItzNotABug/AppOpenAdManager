@@ -35,7 +35,7 @@ class AppOpenAdManager private constructor(
     /**
      * Returns true if an **AppOpenAd** is available
      */
-    private fun isAdAvailable(): Boolean {
+    fun isAdAvailable(): Boolean {
         return !isShowingAd && isAdAvailableInternal() && isInitialDelayOver()
     }
 
