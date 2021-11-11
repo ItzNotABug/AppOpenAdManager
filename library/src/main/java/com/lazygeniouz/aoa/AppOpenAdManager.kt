@@ -39,12 +39,15 @@ class AppOpenAdManager private constructor(
 
     /**
      * Load Ad & optionally attach a listener.
+     */
+    fun loadAppOpenAd() { fetchAd() }
+
+    /**
+     * Assign a listener tp observe AppOpenAd events.
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
-    @JvmOverloads
-    fun loadAppOpenAd(adListener: AppOpenAdListener? = null) {
-        if (listener == null && adListener != null) this.listener = adListener
-        fetchAd()
+    fun setAppOpenAdListener(@NonNull adListener: AppOpenAdListener) {
+        if (listener == null) this.listener = adListener
     }
 
     /**
