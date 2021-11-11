@@ -71,9 +71,12 @@ abstract class BaseAdManager(
                     isLifecycleAttached = true
                     processLifecycle.addObserver(this@BaseAdManager)
                 }
+
+                listener?.onAdLoaded()
             }
 
             override fun onAdFailedToLoad(loadError: LoadAdError) {
+                listener?.onAdFailedToLoad(loadError)
                 logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
             }
         }
