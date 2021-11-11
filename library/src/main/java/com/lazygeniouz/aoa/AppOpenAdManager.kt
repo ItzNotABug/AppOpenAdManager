@@ -40,7 +40,9 @@ class AppOpenAdManager private constructor(
     /**
      * Load Ad & optionally attach a listener.
      */
-    fun loadAppOpenAd() { fetchAd() }
+    fun loadAppOpenAd() {
+        fetchAd()
+    }
 
     /**
      * Assign a listener tp observe AppOpenAd events.
@@ -68,10 +70,7 @@ class AppOpenAdManager private constructor(
         return this.listener
     }
 
-    override fun onResume() {
-        logDebug("ON_RESUME")
-        showAdIfAvailable()
-    }
+    override fun onResume() = showAdIfAvailable()
 
     private fun unpackConfigs() = apply {
         initialDelay = configs.initialDelay
