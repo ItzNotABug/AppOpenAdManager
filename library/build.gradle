@@ -20,8 +20,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 31
 
-        versionCode 204
-        versionName "2.2-alpha04"
+        versionCode 208
+        versionName "2.2-beta02"
     }
 
     buildTypes {

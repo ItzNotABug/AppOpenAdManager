@@ -11,6 +11,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
+import com.lazygeniouz.aoa.AppOpenAdManager
 import com.lazygeniouz.aoa.AppOpenAdManager.Companion.TEST_AD_UNIT_ID
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
@@ -35,8 +36,21 @@ abstract class BaseAdManager(
 ) : BaseObserver(application),
     LifecycleEventObserver {
 
-    init { addObserver() }
+    init {
+        addObserver()
+    }
 
+    /**
+     * Why is this required?
+     * Example: When the user initially starts the app, it will hit **ON_RESUME**,
+     * and suppose the app then asks for some sort of Runtime Permission then after that,
+     * the app will hit the **ON_RESUME** again, which will trigger the lifecycle callback
+     * & that will **load** / **show** the Ad which is not what a user would like.
+     *
+     * So we limit the ad loading in the **ON_RESUME** callback until the user has manually,
+     * at-least once, has called the [AppOpenAdManager.loadAppOpenAd] method.
+     */
+    protected var isManuallyCalled = false
     private val sharedPreferences by lazy {
         application.getSharedPreferences("appOpenAdsManager", Context.MODE_PRIVATE)
     }
@@ -157,6 +171,7 @@ abstract class BaseAdManager(
         val savedDelay = sharedPreferences.getLong("savedDelay", 0L)
         // Zero means first load & it shouldn't be marked as ad available,
         // so we flag that as well as a false value boolean for this specific condition.
-        return savedDelay != 0L && (getCurrentTime() - savedDelay) >= initialDelay.getTime()
+        return if (initialDelay == InitialDelay.NONE) (getCurrentTime() - savedDelay) >= initialDelay.getTime()
+        else savedDelay != 0L && (getCurrentTime() - savedDelay) >= initialDelay.getTime()
     }
 }

@@ -35,6 +35,7 @@ class AppOpenAdManager private constructor(
     /**
      * Returns true if an **AppOpenAd** is available
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     fun isAdAvailable(): Boolean {
         return !isShowingAd && isAdAvailableInternal() && isInitialDelayOver()
     }
@@ -43,8 +44,10 @@ class AppOpenAdManager private constructor(
      * Load Ad & optionally attach a listener.
      */
     fun loadAppOpenAd() {
+        logDebug("AppOpenAdManager#loadAppOpenAd, Is InitialDelay Over: ${isInitialDelayOver()}")
         if (!isInitialDelayOver()) return
         fetchAd()
+        isManuallyCalled = true
     }
 
     /**
@@ -73,7 +76,13 @@ class AppOpenAdManager private constructor(
         return this.listener
     }
 
-    override fun onResume() = showAdIfAvailable()
+    override fun onResume() {
+        if (!isManuallyCalled) return
+        else {
+            isManuallyCalled = true
+            showAdIfAvailable()
+        }
+    }
 
     private fun unpackConfigs() = apply {
         initialDelay = configs.initialDelay
