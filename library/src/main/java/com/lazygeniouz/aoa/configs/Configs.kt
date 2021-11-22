@@ -1,7 +1,6 @@
 package com.lazygeniouz.aoa.configs
 
 import android.app.Activity
-import androidx.annotation.NonNull
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.AppOpenAdManager
@@ -21,11 +20,21 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
  *
  */
 data class Configs @JvmOverloads constructor(
-    @NonNull val initialDelay: InitialDelay,
+    val initialDelay: InitialDelay = InitialDelay(),
     val adUnitId: String = AppOpenAdManager.TEST_AD_UNIT_ID,
     val adRequest: AdRequest = AdRequest.Builder().build(),
     val showAdOnFirstColdStart: Boolean = false,
     val showOnCondition: (() -> Boolean)? = null,
     val showInActivities: ArrayList<Class<out Activity>>? = null,
     val orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
-)
+) {
+    companion object {
+
+        /**
+         * Should **only be used for testing** as the
+         * default parameter values are not meant for Production use.
+         */
+        @JvmField
+        val DEFAULT = Configs()
+    }
+}
