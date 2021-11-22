@@ -9,7 +9,7 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`: **2.2-beta02**\
+`val latest_version`: **2.2**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
@@ -78,7 +78,7 @@ The arguments for the static method `get` are:
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
 
-The `loadAppOpenAd` has an optional `listener: AppOpenAdListener` parameter:\
+There is a `setAppOpenAdListener` method with `listener: AppOpenAdListener` parameter:\
 There are several callbacks with respect to the AppOpenAd.
 * `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
 * `onAdShown()` = Invoked when the Ad is shown
@@ -89,3 +89,9 @@ Other available methods:
 * `getAppOpenAd: AppOpenAd?`: Returns the `AppOpenAd` instance, can be null.
 * `isAdAvailable(): Boolean`: Returns `true` if a valid `AppOpenAd` is available
 * `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.
+* `setAppOpenAdListener(listener: AppOpenAdListener)`:\
+    There are several callbacks with respect to the AppOpenAd.
+    * `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
+    * `onAdShown()` = Invoked when the Ad is shown
+    * `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
+    * `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
