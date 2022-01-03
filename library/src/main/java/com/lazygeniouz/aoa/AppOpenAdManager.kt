@@ -185,7 +185,7 @@ class AppOpenAdManager private constructor(
         }
 
     companion object {
-        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
 
         /**
          * [get]: A static function that returns an instance of [AppOpenAdManager].
