@@ -2,6 +2,7 @@ package com.lazygeniouz.aoa.base
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.Nullable
 import androidx.lifecycle.Lifecycle
@@ -37,7 +38,8 @@ abstract class BaseAdManager(
     LifecycleEventObserver {
 
     init {
-        addObserver()
+        initPrefs()
+        addProcessObserver()
     }
 
     /**
@@ -51,9 +53,7 @@ abstract class BaseAdManager(
      * at-least once, has called the [AppOpenAdManager.loadAppOpenAd] method.
      */
     protected var isManuallyCalled = false
-    private val sharedPreferences by lazy {
-        application.getSharedPreferences("appOpenAdsManager", Context.MODE_PRIVATE)
-    }
+    private lateinit var sharedPreferences: SharedPreferences
 
     // Callbacks
     @Nullable
@@ -108,8 +108,14 @@ abstract class BaseAdManager(
             .putLong("lastTime", value)
             .apply()
 
-    private fun addObserver() {
+    private fun addProcessObserver() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this@BaseAdManager)
+    }
+
+    private fun initPrefs() {
+        val settingsName = "appOpenAdsManager"
+        // A few cases had multi-threading in use, so lazy getValue always returned null.
+        sharedPreferences = application.getSharedPreferences(settingsName, Context.MODE_PRIVATE)
     }
 
     /**

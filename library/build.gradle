@@ -4,21 +4,12 @@ plugins {
     id 'kotlin-android'
 }
 
-allprojects {
-    plugins.withId("com.vanniktech.maven.publish") {
-        mavenPublish {
-            sonatypeHost = "S01"
-        }
-    }
-}
-
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 32
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 31
+        minSdkVersion 19
+        targetSdkVersion 32
     }
 
     buildTypes {
@@ -39,8 +30,6 @@ android {
 }
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-process:2.4.0"
-    implementation 'com.google.android.gms:play-services-ads:20.5.0'
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "androidx.lifecycle:lifecycle-process:2.4.1"
+    implementation 'com.google.android.gms:play-services-ads:21.0.0'
 }

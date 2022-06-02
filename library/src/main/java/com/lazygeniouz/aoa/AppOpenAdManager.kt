@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Handler
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
-import androidx.lifecycle.*
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -172,9 +171,9 @@ class AppOpenAdManager private constructor(
                 fetchAd()
             }
 
-            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 listener?.onAdShowFailed(adError)
-                logError("AppOpenAd failed To show Full-Screen Content: ${adError?.message}")
+                logError("AppOpenAd failed To show Full-Screen Content: ${adError.message}")
             }
 
             override fun onAdShowedFullScreenContent() {
