@@ -9,12 +9,12 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`: **2.2**\
+`val latest_version`: **2.4**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
 ```groovy
-implementation 'com.lazygeniouz:aoa_manager:$latest_version'`
+implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 ```
 
 **Maven:**
