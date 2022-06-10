@@ -1,1 +1,1 @@
-include (':library', ':app')
+include (':aoa_manager', ':app')

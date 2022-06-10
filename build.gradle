@@ -1,4 +1,4 @@
-import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.*
 
 buildscript {
     ext.kotlin_version = "1.6.21"
@@ -12,7 +12,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.19.0'
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.20.0'
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.6.0'
     }
 }
@@ -23,11 +23,16 @@ allprojects {
         mavenCentral()
     }
 
-    plugins.withId("com.vanniktech.maven.publish") {
+
+    plugins.withId("com.vanniktech.maven.publish.base") {
         mavenPublishing {
+            group "com.lazygeniouz"
+            version "2.5.2"
+
             signAllPublications()
             pomFromGradleProperties()
             publishToMavenCentral(SonatypeHost.S01)
+            configure(new AndroidSingleVariantLibrary("release"))
         }
     }
 }
