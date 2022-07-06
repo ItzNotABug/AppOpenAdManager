@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit
  * @param application Required to keep a track of App's state.
  * @param configs A Data class to pass required arguments.
  */
+@Suppress("unused")
 class AppOpenAdManager private constructor(
     @NonNull application: Application,
     @NonNull private val configs: Configs
