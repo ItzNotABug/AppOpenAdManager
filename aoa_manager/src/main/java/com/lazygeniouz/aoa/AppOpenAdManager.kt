@@ -9,7 +9,6 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
-import com.lazygeniouz.aoa.extensions.isClientOnline
 import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.DelayType
@@ -151,9 +150,6 @@ class AppOpenAdManager private constructor(
         if (adUnitId == TEST_AD_UNIT_ID)
             logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production.")
 
-        if (!getApplication().isClientOnline())
-            logError("There is no active internet connection, calls to loading the Ad will fail.")
-
         AppOpenAd.load(
             getApplication(),
             adUnitId, adRequest,
@@ -178,8 +174,8 @@ class AppOpenAdManager private constructor(
 
             override fun onAdShowedFullScreenContent() {
                 listener?.onAdShown()
-                logDebug("AppOpenAd Shown")
                 isShowingAd = true
+                logDebug("AppOpenAd Shown")
             }
         }
 
