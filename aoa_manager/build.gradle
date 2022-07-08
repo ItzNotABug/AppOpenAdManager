@@ -21,6 +21,6 @@ android {
 }
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-process:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-process:2.5.0"
     implementation 'com.google.android.gms:play-services-ads:21.0.0'
 }
