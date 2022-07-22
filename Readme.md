@@ -31,13 +31,15 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 **Kotlin:**
 ```kotlin
 val adManager = AppOpenManager.get(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
-adManager.loadAppOpenAd(listener)
+adManager.setAppOpenAdListener(listener)
+adManager.loadAppOpenAd()
 ```
 
 **Java:**
 ```java
 AppOpenManager adManager = AppOpenManager.get(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
-adManager.loadAppOpenAd(listener)
+adManager.setAppOpenAdListener(listener);
+adManager.loadAppOpenAd();
 ```
 
 The arguments for the static method `get` are:
