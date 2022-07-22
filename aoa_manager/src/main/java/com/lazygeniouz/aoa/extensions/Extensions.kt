@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.lazygeniouz.aoa.extensions
 
 import android.app.Application
@@ -17,7 +19,20 @@ internal fun logError(message: Any) = Log.e(TAG, message.toString())
  *
  * @param configs Configurations for the AppOpenAd
  * @see Configs for more info.
+ *
+ * @return [AppOpenAdManager]
  */
 fun Application.getAppOpenAdManager(configs: Configs = Configs.DEFAULT): AppOpenAdManager {
     return AppOpenAdManager.get(this, configs)
 }
+
+/**
+ * Handy extension variable with default [Configs].
+ *
+ * To customize the [Configs], use [Application.getAppOpenAdManager] extension function.
+ *
+ * @see [Configs]
+ * @return [AppOpenAdManager]
+ */
+val Application.appOpenAdManager
+    get() = AppOpenAdManager.get(this, Configs.DEFAULT)
