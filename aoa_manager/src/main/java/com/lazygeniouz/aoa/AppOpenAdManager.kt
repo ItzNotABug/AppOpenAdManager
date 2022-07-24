@@ -40,6 +40,14 @@ class AppOpenAdManager private constructor(
     }
 
     /**
+     * Can be used to manually remove the Ad if you cannot directly use the [Configs.showOnCondition]
+     */
+    fun clearAdInstance() {
+        listener = null
+        appOpenAdInstance = null
+    }
+
+    /**
      * Load Ad & optionally attach a listener.
      */
     fun loadAppOpenAd() {

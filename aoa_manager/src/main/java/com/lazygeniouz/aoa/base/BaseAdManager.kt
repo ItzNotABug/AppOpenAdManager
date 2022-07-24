@@ -24,8 +24,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
- * A Base class that extends
- * @see BaseObserver to handle Activity Lifecycle,
+ * A Base class that extends [BaseObserver] to handle Activity Lifecycle.
  *
  * This class is created to declare a few helper methods and variables,
  * so that our main usable class does not have a lot of methods and variables.
