@@ -89,6 +89,7 @@ There are several callbacks with respect to the AppOpenAd.
 
 Other available methods:
 * `getAppOpenAd: AppOpenAd?`: Returns the `AppOpenAd` instance, can be null.
+* `clearAdInstance(): Unit`: Sets the `AppOpenAd` instance to `null` if it is not.
 * `isAdAvailable(): Boolean`: Returns `true` if a valid `AppOpenAd` is available
 * `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.
 * `setAppOpenAdListener(listener: AppOpenAdListener)`:\
