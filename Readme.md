@@ -9,7 +9,7 @@ A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK
 All that boilerplate, now wrapped to a Single line of Code for the developer.
 
 ## Dependency
-`val latest_version`: **2.5.5**\
+`val latest_version`: **2.5.6**\
 **Note: `AppOpenAdManager` is now available on MavenCentral**
 
 **Gradle:**
