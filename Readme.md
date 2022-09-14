@@ -30,14 +30,14 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 ## Usage
 **Kotlin:**
 ```kotlin
-val adManager = AppOpenManager.get(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
+val adManager = AppOpenAdManager.get(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
 adManager.setAppOpenAdListener(listener)
 adManager.loadAppOpenAd()
 ```
 
 **Java:**
 ```java
-AppOpenManager adManager = AppOpenManager.get(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
+AppOpenAdManager adManager = AppOpenAdManager.get(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
 adManager.setAppOpenAdListener(listener);
 adManager.loadAppOpenAd();
 ```
