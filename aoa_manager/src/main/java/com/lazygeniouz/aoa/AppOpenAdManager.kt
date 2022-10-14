@@ -2,8 +2,6 @@ package com.lazygeniouz.aoa
 
 import android.app.Application
 import android.os.Handler
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -22,8 +20,8 @@ import java.util.concurrent.TimeUnit
  */
 @Suppress("unused")
 class AppOpenAdManager private constructor(
-    @NonNull application: Application,
-    @NonNull private val configs: Configs
+    application: Application,
+    private val configs: Configs
 ) : BaseAdManager(application, configs) {
 
     init {
@@ -61,7 +59,7 @@ class AppOpenAdManager private constructor(
      * Assign a listener to observe AppOpenAd events.
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
-    fun setAppOpenAdListener(@NonNull adListener: AppOpenAdListener) = apply {
+    fun setAppOpenAdListener(adListener: AppOpenAdListener) = apply {
         if (listener == null) this.listener = adListener
     }
 
@@ -69,7 +67,6 @@ class AppOpenAdManager private constructor(
      * Returns the [AppOpenAd] instance, can be **null** if it is not loaded yet.
      * @return [AppOpenAd]
      */
-    @Nullable
     fun getAppOpenAd(): AppOpenAd? {
         return appOpenAdInstance
     }
@@ -78,7 +75,6 @@ class AppOpenAdManager private constructor(
      * Returns the currently set Ad Listener, can be **null**.
      * @return [AppOpenAdListener]
      */
-    @Nullable
     fun getAdListener(): AppOpenAdListener? {
         return this.listener
     }
@@ -199,7 +195,7 @@ class AppOpenAdManager private constructor(
         @JvmStatic
         @JvmOverloads
         fun get(
-            @NonNull application: Application,
+            application: Application,
             configs: Configs = Configs.DEFAULT,
         ): AppOpenAdManager {
             return AppOpenAdManager(application, configs)

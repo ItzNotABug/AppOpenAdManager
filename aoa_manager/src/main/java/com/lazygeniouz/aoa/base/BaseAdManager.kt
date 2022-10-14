@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import androidx.annotation.Nullable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -55,10 +54,8 @@ abstract class BaseAdManager(
     private lateinit var sharedPreferences: SharedPreferences
 
     // Callbacks
-    @Nullable
     protected var listener: AppOpenAdListener? = null
 
-    @Nullable
     protected var coldShowListener: (() -> Unit)? = null
 
     protected var isLoading = false
