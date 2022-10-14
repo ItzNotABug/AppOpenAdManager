@@ -18,9 +18,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    namespace 'com.lazygeniouz.aoa'
 }
 
 dependencies {
     implementation "androidx.lifecycle:lifecycle-process:2.5.1"
-    implementation 'com.google.android.gms:play-services-ads:21.2.0'
+    implementation 'com.google.android.gms:play-services-ads:21.3.0'
 }
