@@ -5,40 +5,22 @@
 `AppOpenAdManager` is just a simple wrapper to handle the new `AppOpenAd` Format by **Google AdMob**.\
 If you look at the [tutorial](https://developers.google.com/admob/android/app-open-ads), you'll see the detailed guide to create a `Helper Class` to manage `AppOpenAd`.
 
-A simplistic **Plug&Play** wrapper should have been included in the core Ads SDK itself but it wasn't, so I ended up creating the wrapper!\
-All that boilerplate, now wrapped to a Single line of Code for the developer.
-
 ## Dependency
-`val latest_version`: **2.5.8**\
+`val latest_version`: **2.6.0**
 
 **Gradle:**
 ```groovy
 implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 ```
 
-**Maven:**
-```maven
-<dependency>
-  <groupId>com.lazygeniouz</groupId>
-  <artifactId>aoa_manager</artifactId>
-  <version>$latest_version</version>
-  <type>aar</type>
-</dependency>
-```
-
 ## Usage
-**Kotlin:**
 ```kotlin
-val adManager = AppOpenAdManager.get(this, Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation))
+val configs = Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation)
+val adManager = AppOpenAdManager.get(application, configs)
 adManager.setAppOpenAdListener(listener)
+adManager.setOnPaidEventListener(paidEventListener)
+adManager.setImmersiveMode(true)
 adManager.loadAppOpenAd()
-```
-
-**Java:**
-```java
-AppOpenAdManager adManager = AppOpenAdManager.get(App.this, new Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation));
-adManager.setAppOpenAdListener(listener);
-adManager.loadAppOpenAd();
 ```
 
 The arguments for the static method `get` are:
@@ -79,21 +61,28 @@ The arguments for the static method `get` are:
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
         `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
 
-There is a `setAppOpenAdListener` method with `listener: AppOpenAdListener` parameter:\
-There are several callbacks with respect to the AppOpenAd.
-* `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
-* `onAdShown()` = Invoked when the Ad is shown
-* `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
-* `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
-
 Other available methods:
 * `getAppOpenAd: AppOpenAd?`: Returns the `AppOpenAd` instance, can be null.
+
 * `clearAdInstance(): Unit`: Sets the `AppOpenAd` instance to `null` if it is not.
+
 * `isAdAvailable(): Boolean`: Returns `true` if a valid `AppOpenAd` is available
+
+* `setImmersiveMode(Boolean): Unit`: Sets whether to show the `AdOpenAd` in immersive mode.
+
 * `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.
+
 * `setAppOpenAdListener(listener: AppOpenAdListener)`:\
     There are several callbacks with respect to the AppOpenAd.
+    * `onAdLoaded()` = Invoked when the Ad is loaded successfully.
+    * `onAdFailedToLoad(LoadAdError)` = Invoked when the Ad failed to load with supplied LoadAdError.
     * `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
     * `onAdShown()` = Invoked when the Ad is shown
     * `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
     * `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
+
+* `setOnPaidEventListener(listener: OnPaidEventListener)`:
+    * `onPaidEvent(AdValue)` = Called when an ad is estimated to have earned money.
+      * `AdValue` = Contains information about the monetary value earned from an ad.
+
+* `getPaidEventListener(): OnPaidEventListener?`: Returns the currently set Ad's PaidEventListener, can be null..
