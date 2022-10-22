@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.AppOpenAdManager
 import com.lazygeniouz.aoa.AppOpenAdManager.Companion.TEST_AD_UNIT_ID
@@ -55,7 +56,9 @@ abstract class BaseAdManager(
 
     // Callbacks
     protected var listener: AppOpenAdListener? = null
+    protected var adPaidEventListener: OnPaidEventListener? = null
 
+    protected var isImmersive: Boolean = false
     protected var coldShowListener: (() -> Unit)? = null
 
     protected var isLoading = false

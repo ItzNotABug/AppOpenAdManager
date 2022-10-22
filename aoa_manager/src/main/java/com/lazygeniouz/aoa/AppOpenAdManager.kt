@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Handler
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
@@ -41,7 +42,6 @@ class AppOpenAdManager private constructor(
      * Can be used to manually remove the Ad if you cannot directly use the [Configs.showOnCondition]
      */
     fun clearAdInstance() {
-        listener = null
         appOpenAdInstance = null
     }
 
@@ -64,6 +64,24 @@ class AppOpenAdManager private constructor(
     }
 
     /**
+     * Assign a listener to observe if the AppOpenAd earned any money.
+     * @param paidListener An optional listener if you want to observe Ad's monetary values.
+     */
+    fun setOnPaidEventListener(paidListener: OnPaidEventListener) = apply {
+        if (adPaidEventListener == null) this.adPaidEventListener = paidListener
+    }
+
+    /**
+     * Sets a flag that controls if this app open ad object will be displayed in immersive mode.
+     *
+     * During show time, if this flag is on and immersive mode is supported,
+     * SYSTEM_UI_FLAG_IMMERSIVE_STICKY & SYSTEM_UI_FLAG_HIDE_NAVIGATION will be turned on for the app open ad.
+     */
+    fun setImmersiveMode(isImmersiveMode: Boolean) {
+        this.isImmersive = isImmersiveMode
+    }
+
+    /**
      * Returns the [AppOpenAd] instance, can be **null** if it is not loaded yet.
      * @return [AppOpenAd]
      */
@@ -77,6 +95,14 @@ class AppOpenAdManager private constructor(
      */
     fun getAdListener(): AppOpenAdListener? {
         return this.listener
+    }
+
+    /**
+     * Returns the currently set Ad's **PaidEventListener**, can be **null**.
+     * @return [OnPaidEventListener]
+     */
+    fun getPaidEventListener(): OnPaidEventListener? {
+        return this.adPaidEventListener
     }
 
     override fun onResume() {
@@ -136,6 +162,8 @@ class AppOpenAdManager private constructor(
             return@let
         }
 
+        openAd.setImmersiveMode(isImmersive)
+        openAd.onPaidEventListener = adPaidEventListener
         openAd.fullScreenContentCallback = getFullScreenContentCallback()
         currentActivity?.let { activity ->
             if (listener != null) {
