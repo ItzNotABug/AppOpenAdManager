@@ -59,6 +59,7 @@ abstract class BaseAdManager(
     protected var adPaidEventListener: OnPaidEventListener? = null
 
     protected var isImmersive: Boolean = false
+    protected var adShowDelayPeriod: Long = 1000
     protected var coldShowListener: (() -> Unit)? = null
 
     protected var isLoading = false

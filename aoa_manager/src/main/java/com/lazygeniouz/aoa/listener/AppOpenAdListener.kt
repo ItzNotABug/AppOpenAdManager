@@ -22,10 +22,10 @@ abstract class AppOpenAdListener {
     open fun onAdFailedToLoad(loadAdError: LoadAdError) {}
 
     /**
-     * Fired before the Ad is shown
+     * Fired sometime before the Ad is shown
      *
-     * The Ad will be shown after a delay of a 750ms post this callback
-     * so that an action can be performed if needed before showing the Ad
+     * The Ad will be shown after a delay of a 1000ms or the time provided
+     * post this callback so that an action can be performed if needed before showing the Ad
      */
     open fun onAdWillShow() {}
 

@@ -12,7 +12,6 @@ import com.lazygeniouz.aoa.extensions.logDebug
 import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
-import java.util.concurrent.TimeUnit
 
 /**
  * [AppOpenAdManager]: A class that handles all of the App Open Ad operations.
@@ -79,6 +78,32 @@ class AppOpenAdManager private constructor(
      */
     fun setImmersiveMode(isImmersiveMode: Boolean) {
         this.isImmersive = isImmersiveMode
+    }
+
+    /**
+     * Set a delay for showing the AppOpenAd.
+     *
+     * The [AppOpenAdListener.onAdWillShow] will be invoked
+     * before [AppOpenAdListener.onAdShown] with a default delay of 1 second.
+     *
+     * @param useDelay Use a delay of 1 second for showing the Ad if true
+     */
+    fun showAdWithDelay(useDelay: Boolean) {
+        // 1 second
+        if (useDelay) this.adShowDelayPeriod = 1000
+        else adShowDelayPeriod = 0
+    }
+
+    /**
+     * Set a custom delay for showing the AppOpenAd.
+     *
+     * The [AppOpenAdListener.onAdWillShow] will be invoked
+     * before [AppOpenAdListener.onAdShown] with a delay of provided time in milliseconds.
+     *
+     * @param timeInMillis Use a custom delay in milliseconds for delaying the Ad showing.
+     */
+    fun showAdWithDelay(timeInMillis: Long) {
+        this.adShowDelayPeriod = timeInMillis
     }
 
     /**
@@ -166,10 +191,12 @@ class AppOpenAdManager private constructor(
         openAd.onPaidEventListener = adPaidEventListener
         openAd.fullScreenContentCallback = getFullScreenContentCallback()
         currentActivity?.let { activity ->
-            if (listener != null) {
+            // listener is not null & the delay is valid
+            if (listener != null && adShowDelayPeriod > 0L) {
                 listener?.onAdWillShow().also {
+                    logDebug("Ad will be shown after ${this.adShowDelayPeriod}ms")
                     Handler(activity.mainLooper)
-                        .postDelayed({ openAd.show(activity) }, TimeUnit.SECONDS.toMillis(1))
+                        .postDelayed({ openAd.show(activity) }, this.adShowDelayPeriod)
                 }
             } else openAd.show(activity)
         }
