@@ -26,7 +26,7 @@ allprojects {
     plugins.withId("com.vanniktech.maven.publish.base") {
         mavenPublishing {
             group "com.lazygeniouz"
-            version "2.6.0"
+            version "2.6.1"
 
             signAllPublications()
             pomFromGradleProperties()

@@ -6,7 +6,7 @@
 If you look at the [tutorial](https://developers.google.com/admob/android/app-open-ads), you'll see the detailed guide to create a `Helper Class` to manage `AppOpenAd`.
 
 ## Dependency
-`val latest_version`: **2.6.0**
+`val latest_version`: **2.6.1**
 
 **Gradle:**
 ```groovy
@@ -17,8 +17,9 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 ```kotlin
 val configs = Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation)
 val adManager = AppOpenAdManager.get(application, configs)
-adManager.setAppOpenAdListener(listener)
+adManager.setAppOpenAdListener(appOpenAdlistener)
 adManager.setOnPaidEventListener(paidEventListener)
+adManager.showAdWithDelay(false)
 adManager.setImmersiveMode(true)
 adManager.loadAppOpenAd()
 ```
@@ -70,13 +71,17 @@ Other available methods:
 
 * `setImmersiveMode(Boolean): Unit`: Sets whether to show the `AdOpenAd` in immersive mode.
 
+* `showAdWithDelay(Boolean): Unit`: Delays showing the `AdOpenAd` by 1 second if true.
+
+* `showAdWithDelay(Long): Unit`: Delays showing the `AdOpenAd` by the provided time in milliseconds.
+
 * `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.
 
 * `setAppOpenAdListener(listener: AppOpenAdListener)`:\
     There are several callbacks with respect to the AppOpenAd.
     * `onAdLoaded()` = Invoked when the Ad is loaded successfully.
     * `onAdFailedToLoad(LoadAdError)` = Invoked when the Ad failed to load with supplied LoadAdError.
-    * `onAdWillShow()` = Invoked before the Ad is shown, a delay of 1000ms.
+    * `onAdWillShow()` = Invoked before the Ad is shown, a default delay of 1000ms or value provided.
     * `onAdShown()` = Invoked when the Ad is shown
     * `onAdDismissed()` = Invoked after the Ad is dismissed from the screen
     * `onAdShowFailed(AdError)` = Invoked when there was an error showing the Ad with supplied AdError
