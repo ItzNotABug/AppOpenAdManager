@@ -11,8 +11,6 @@ internal const val TAG = "AppOpenAdManager"
 
 internal fun logDebug(message: Any) = Log.d(TAG, message.toString())
 
-internal fun logError(message: Any) = Log.e(TAG, message.toString())
-
 /**
  * Extension function to use [AppOpenAdManager.get]
  * directly in a class that extends the [Application] class
