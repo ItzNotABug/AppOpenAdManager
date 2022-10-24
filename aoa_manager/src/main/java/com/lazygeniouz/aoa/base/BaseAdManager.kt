@@ -9,14 +9,13 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.AppOpenAdManager
 import com.lazygeniouz.aoa.AppOpenAdManager.Companion.TEST_AD_UNIT_ID
 import com.lazygeniouz.aoa.configs.Configs
-import com.lazygeniouz.aoa.extensions.logDebug
-import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.InitialDelay
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
 import java.time.Instant
@@ -71,9 +70,13 @@ abstract class BaseAdManager(
     protected val loadCallback: AppOpenAd.AppOpenAdLoadCallback =
         object : AppOpenAd.AppOpenAdLoadCallback() {
             override fun onAdLoaded(loadedAd: AppOpenAd) {
-                appOpenAdInstance = loadedAd
                 loadTime = getCurrentTime()
-                logDebug("Ad Loaded")
+
+                // set listeners and other options
+                loadedAd.setImmersiveMode(isImmersive)
+                loadedAd.onPaidEventListener = adPaidEventListener
+                loadedAd.fullScreenContentCallback = getFullScreenCallback()
+                appOpenAdInstance = loadedAd
 
                 if (!coldStartShown
                     && configs.showAdOnFirstColdStart
@@ -90,7 +93,6 @@ abstract class BaseAdManager(
             override fun onAdFailedToLoad(loadError: LoadAdError) {
                 isLoading = false
                 listener?.onAdFailedToLoad(loadError)
-                logError("Ad Failed To Load, Reason: ${loadError.responseInfo}")
             }
         }
 
@@ -122,6 +124,8 @@ abstract class BaseAdManager(
      * `onResume` will be fired when the lifecycle event for **ON_RESUME** is triggered.
      */
     abstract fun onResume()
+
+    abstract fun getFullScreenCallback(): FullScreenContentCallback
 
     /**
      * State observer callback to handle relevant operations.

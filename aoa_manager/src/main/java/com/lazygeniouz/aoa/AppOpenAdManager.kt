@@ -9,7 +9,6 @@ import com.google.android.gms.ads.appopen.AppOpenAd
 import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
-import com.lazygeniouz.aoa.extensions.logError
 import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
 
@@ -160,8 +159,9 @@ class AppOpenAdManager private constructor(
             // If the passed activity class equals to the current activity, then show the Ad.
             if (configs.showInActivities != null) {
                 if (currentActivity != null) {
-                    if (currentActivity!!.javaClass in configs.showInActivities) showAd()
-                    else logDebug("Current Activity (${currentActivity!!.javaClass.simpleName}) not included in the Activity List provided in Configs.showInActivities")
+                    val activity = currentActivity!!
+                    if (activity.javaClass in configs.showInActivities) showAd()
+                    else logDebug("Current Activity (${activity.javaClass.simpleName}) not included in the Activity List provided in Configs.showInActivities")
                 } else logDebug("Current Activity is @null, strange! *_*")
             } else showAd()
         } else {
@@ -181,24 +181,23 @@ class AppOpenAdManager private constructor(
         }
     }
 
-    private fun showAd() = appOpenAdInstance?.let { openAd ->
-        if (configs.showOnCondition?.invoke() == false) {
-            logDebug("Configs.showOnCondition lambda returned false, Ad will not be shown")
-            return@let
-        }
+    private fun showAd() {
+        appOpenAdInstance?.let { appOpenAd ->
+            if (configs.showOnCondition?.invoke() == false) {
+                logDebug("Configs.showOnCondition lambda returned false, Ad will not be shown")
+                return@let
+            }
 
-        openAd.setImmersiveMode(isImmersive)
-        openAd.onPaidEventListener = adPaidEventListener
-        openAd.fullScreenContentCallback = getFullScreenContentCallback()
-        currentActivity?.let { activity ->
-            // listener is not null & the delay is valid
-            if (listener != null && adShowDelayPeriod > 0L) {
-                listener?.onAdWillShow().also {
-                    logDebug("Ad will be shown after ${this.adShowDelayPeriod}ms")
-                    Handler(activity.mainLooper)
-                        .postDelayed({ openAd.show(activity) }, this.adShowDelayPeriod)
-                }
-            } else openAd.show(activity)
+            currentActivity?.let { activity ->
+                // listener is not null & the delay is valid
+                if (listener != null && adShowDelayPeriod > 0L) {
+                    listener?.onAdWillShow().also {
+                        logDebug("Ad will be shown after ${this.adShowDelayPeriod}ms")
+                        Handler(activity.mainLooper)
+                            .postDelayed({ appOpenAd.show(activity) }, this.adShowDelayPeriod)
+                    }
+                } else appOpenAd.show(activity)
+            }
         }
     }
 
@@ -217,9 +216,9 @@ class AppOpenAdManager private constructor(
         ).also { logDebug("A pre-cached Ad was not available, loading one.") }
     }
 
-    // Handling the visibility of App Open Ad
-    private fun getFullScreenContentCallback() =
-        object : FullScreenContentCallback() {
+    // Handling the visibility of the AppOpenAd
+    override fun getFullScreenCallback(): FullScreenContentCallback {
+        return object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 listener?.onAdDismissed()
                 appOpenAdInstance = null
@@ -229,17 +228,19 @@ class AppOpenAdManager private constructor(
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 listener?.onAdShowFailed(adError)
-                logError("AppOpenAd failed To show Full-Screen Content: ${adError.message}")
             }
 
             override fun onAdShowedFullScreenContent() {
                 listener?.onAdShown()
                 isShowingAd = true
-                logDebug("AppOpenAd Shown")
             }
         }
+    }
 
     companion object {
+        /**
+         * The ad unit used for testing.
+         */
         const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
 
         /**
