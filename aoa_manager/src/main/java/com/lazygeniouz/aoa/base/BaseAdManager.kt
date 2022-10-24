@@ -79,8 +79,8 @@ abstract class BaseAdManager(
                 appOpenAdInstance = loadedAd
 
                 if (!coldStartShown
-                    && configs.showAdOnFirstColdStart
                     && isInitialDelayOver()
+                    && configs.showOnColdStart?.invoke() == true
                 ) {
                     coldShowListener?.invoke()
                     coldStartShown = true

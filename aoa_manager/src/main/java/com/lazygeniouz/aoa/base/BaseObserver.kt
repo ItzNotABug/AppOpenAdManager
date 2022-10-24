@@ -39,7 +39,7 @@ open class BaseObserver(application: Application) :
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        // this is required for [Configs.showAdOnFirstColdStart]
+        // this is required for [Configs.showOnColdStart]
         if (currentActivity?.javaClass?.simpleName.equals(activity.javaClass.simpleName)) {
             currentActivity = null
         }
