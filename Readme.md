@@ -6,7 +6,7 @@
 If you look at the [tutorial](https://developers.google.com/admob/android/app-open-ads), you'll see the detailed guide to create a `Helper Class` to manage `AppOpenAd`.
 
 ## Dependency
-`val latest_version`: **2.6.1**
+`val latest_version`: **2.6.2**
 
 **Gradle:**
 ```groovy
@@ -44,7 +44,7 @@ The arguments for the static method `get` are:
      * `adRequest: AdRequest`\
         (Optional) If you have a customised AdRequest
 
-     * `showAdOnFirstColdStart: Boolean`\
+     * `showOnColdStart: Boolean`\
         (Optional) Show Ad as soon as it load on the first Cold start if true,
         this will ignore the Activities passed in the [showInActivities]
 
