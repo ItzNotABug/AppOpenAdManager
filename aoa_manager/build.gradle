@@ -6,6 +6,7 @@ plugins {
 
 android {
     compileSdkVersion 33
+    namespace 'com.lazygeniouz.aoa'
 
     defaultConfig {
         minSdkVersion 19
@@ -18,8 +19,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
-    namespace 'com.lazygeniouz.aoa'
 }
 
 dependencies {
