@@ -15,7 +15,7 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 
 ## Usage
 ```kotlin
-val configs = Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity, orientation)
+val configs = Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity)
 val adManager = AppOpenAdManager.get(application, configs)
 adManager.setAppOpenAdListener(appOpenAdlistener)
 adManager.setOnPaidEventListener(paidEventListener)
@@ -55,12 +55,6 @@ The arguments for the static method `get` are:
      * `showInActivities: Class<out Activity>`\
         (Optional) If you want to show the Ad only in specific Activities (e.g: SplashActivity).\
         See: [this issue](https://github.com/ItzNotABug/AppOpenAdManager/issues/5) & the Example App for more info.
-
-     * `orientation: Int`\
-        (Optional) Default is `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
-        Available variables are:\
-        `AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT`\
-        `AppOpenAd.APP_OPEN_AD_ORIENTATION_LANDSCAPE`
 
 Other available methods:
 * `getAppOpenAd: AppOpenAd?`: Returns the `AppOpenAd` instance, can be null.
