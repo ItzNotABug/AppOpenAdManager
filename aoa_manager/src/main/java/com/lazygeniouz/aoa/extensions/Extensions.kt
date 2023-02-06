@@ -29,6 +29,9 @@ fun Application.getAppOpenAdManager(configs: Configs = Configs.DEFAULT): AppOpen
  *
  * To customize the [Configs], use [Application.getAppOpenAdManager] extension function.
  *
+ * **Note: This is not a singleton & will return a new instance everytime this is called, so be
+ * careful!**
+ *
  * @see [Configs]
  * @return [AppOpenAdManager]
  */

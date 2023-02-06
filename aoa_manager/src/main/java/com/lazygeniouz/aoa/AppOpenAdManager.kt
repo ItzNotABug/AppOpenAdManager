@@ -141,7 +141,6 @@ class AppOpenAdManager private constructor(
         initialDelay = configs.initialDelay
         adRequest = configs.adRequest
         adUnitId = configs.adUnitId
-        orientation = configs.orientation
     }
 
     private fun attachColdStartListener() = apply { coldShowListener = { showAd() } }
@@ -209,11 +208,9 @@ class AppOpenAdManager private constructor(
         if (adUnitId == TEST_AD_UNIT_ID)
             logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production.")
 
-        AppOpenAd.load(
-            getApplication(),
-            adUnitId, adRequest,
-            orientation, loadCallback
-        ).also { logDebug("A pre-cached Ad was not available, loading one.") }
+        AppOpenAd.load(getApplication(), adUnitId, adRequest, loadCallback).also {
+            logDebug("A pre-cached Ad was not available, loading one.")
+        }
     }
 
     // Handling the visibility of the AppOpenAd

@@ -11,12 +11,11 @@ import com.lazygeniouz.aoa.idelay.InitialDelay
  *
  * @param adUnitId Pass your created AdUnitId
  * @param initialDelay for setting up an Initial Delay
- * @param adRequest Pass a customised AdRequest if you have any.
+ * @param adRequest Pass a customised AdRequest if you have any
  * @param showOnColdStart Show Ad as soon as it load on the first Cold start if true,
  * this will ignore the Initial Activity irrespective of what is passed in the [showInActivities]
- * @param showOnCondition Show AppOpenAd only when a specific condition is met.
+ * @param showOnCondition Show AppOpenAd only when a specific condition is met
  * @param showInActivities Show [AppOpenAd] only when the visible Activity is in this list
- * @param orientation Ad's Orientation, Can be PORTRAIT or LANDSCAPE (Default is Portrait)
  *
  */
 data class Configs @JvmOverloads constructor(
@@ -26,7 +25,6 @@ data class Configs @JvmOverloads constructor(
     val showOnColdStart: (() -> Boolean)? = null,
     val showOnCondition: (() -> Boolean)? = null,
     val showInActivities: ArrayList<Class<out Activity>>? = null,
-    val orientation: Int = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
 ) {
     companion object {
 

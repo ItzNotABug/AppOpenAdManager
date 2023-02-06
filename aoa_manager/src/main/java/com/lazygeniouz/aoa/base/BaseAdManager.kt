@@ -99,7 +99,6 @@ abstract class BaseAdManager(
     protected var adUnitId: String = TEST_AD_UNIT_ID
     protected var initialDelay: InitialDelay = InitialDelay()
     protected var adRequest: AdRequest = AdRequest.Builder().build()
-    protected var orientation = AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT
 
     protected fun getApplication(): Application = application
 
