@@ -16,6 +16,7 @@ implementation 'com.lazygeniouz:aoa_manager:$latest_version'
 val configs = Configs(InitialDelay.NONE, adUnitId, adRequest, showInActivity)
 val adManager = AppOpenAdManager.get(application, configs)
 adManager.setAppOpenAdListener(appOpenAdlistener)
+adManager.setAdTransition(R.anim.enterAnim, R.anim.exitAnim)
 adManager.setOnPaidEventListener(paidEventListener)
 adManager.showAdWithDelay(false)
 adManager.setImmersiveMode(true)
@@ -66,6 +67,9 @@ Other available methods:
 * `showAdWithDelay(Boolean): Unit`: Delays showing the `AdOpenAd` by 1 second if true.
 
 * `showAdWithDelay(Long): Unit`: Delays showing the `AdOpenAd` by the provided time in milliseconds.
+
+* `setAdTransition(Int, Int): Unit`: Use an activity animation when the Ad is shown, similar to 
+`Activity.overridePendingTransition` or `Activity.overrideActivityTransition`.
 
 * `getAdListener(): AppOpenAdListener?`: Returns the currently set Ad Listener, can be null.
 
