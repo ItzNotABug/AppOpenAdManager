@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     namespace 'com.lazygeniouz.aoa'
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 33
+        targetSdkVersion 34
     }
 
     buildTypes {
@@ -22,6 +22,6 @@ android {
 }
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-process:2.5.1"
-    implementation 'com.google.android.gms:play-services-ads:21.5.0'
+    implementation "androidx.lifecycle:lifecycle-process:2.6.1"
+    implementation 'com.google.android.gms:play-services-ads:22.2.0'
 }
