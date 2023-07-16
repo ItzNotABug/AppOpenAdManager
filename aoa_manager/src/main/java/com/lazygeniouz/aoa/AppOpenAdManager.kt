@@ -1,6 +1,8 @@
 package com.lazygeniouz.aoa
 
+import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Handler
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -73,10 +75,18 @@ class AppOpenAdManager private constructor(
      * Sets a flag that controls if this app open ad object will be displayed in immersive mode.
      *
      * During show time, if this flag is on and immersive mode is supported,
-     * SYSTEM_UI_FLAG_IMMERSIVE_STICKY & SYSTEM_UI_FLAG_HIDE_NAVIGATION will be turned on for the app open ad.
+     * `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` & `SYSTEM_UI_FLAG_HIDE_NAVIGATION` will be turned on for the app open ad.
      */
     fun setImmersiveMode(isImmersiveMode: Boolean) {
         this.isImmersive = isImmersiveMode
+    }
+
+    /**
+     * Use an activity animation when the Ad is shown,
+     * similar to [Activity.overridePendingTransition] or [Activity.overrideActivityTransition].
+     */
+    fun setAdTransition(enterAnim: Int, exitAnim: Int) {
+        this.adEnterTransition = enterAnim to exitAnim
     }
 
     /**
@@ -107,6 +117,10 @@ class AppOpenAdManager private constructor(
 
     /**
      * Returns the [AppOpenAd] instance, can be **null** if it is not loaded yet.
+     *
+     * **Note:** If you manually use `getAppOpenAd().show(activity)`,
+     * then the [setAdTransition] will not work but you may also use
+     * [Activity.overridePendingTransition] or [Activity.overrideActivityTransition].
      * @return [AppOpenAd]
      */
     fun getAppOpenAd(): AppOpenAd? {
@@ -138,9 +152,9 @@ class AppOpenAdManager private constructor(
     }
 
     private fun unpackConfigs() = apply {
-        initialDelay = configs.initialDelay
-        adRequest = configs.adRequest
         adUnitId = configs.adUnitId
+        adRequest = configs.adRequest
+        initialDelay = configs.initialDelay
     }
 
     private fun attachColdStartListener() = apply { coldShowListener = { showAd() } }
@@ -188,15 +202,29 @@ class AppOpenAdManager private constructor(
             }
 
             currentActivity?.let { activity ->
-                // listener is not null & the delay is valid
-                if (listener != null && adShowDelayPeriod > 0L) {
-                    listener?.onAdWillShow().also {
-                        logDebug("Ad will be shown after ${this.adShowDelayPeriod}ms")
-                        Handler(activity.mainLooper)
-                            .postDelayed({ appOpenAd.show(activity) }, this.adShowDelayPeriod)
-                    }
-                } else appOpenAd.show(activity)
+                if (adShowDelayPeriod > 0L) {
+                    listener?.onAdWillShow()
+                    Handler(activity.mainLooper).postDelayed({
+                        appOpenAd.show(activity)
+                        applyAdEnterTransition(activity)
+                    }, this.adShowDelayPeriod)
+                } else {
+                    appOpenAd.show(activity)
+                    applyAdEnterTransition(activity)
+                }
             }
+        }
+    }
+
+    private fun applyAdEnterTransition(activity: Activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            activity.overrideActivityTransition(
+                Activity.OVERRIDE_TRANSITION_OPEN,
+                adEnterTransition.first, adEnterTransition.second
+            )
+        } else {
+            @Suppress("deprecation")
+            activity.overridePendingTransition(adEnterTransition.first, adEnterTransition.second)
         }
     }
 
