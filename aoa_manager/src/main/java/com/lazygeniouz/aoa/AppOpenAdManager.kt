@@ -266,7 +266,7 @@ class AppOpenAdManager private constructor(
         /**
          * The ad unit used for testing.
          */
-        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
+        const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921"
 
         /**
          * [get]: A static function that returns an instance of [AppOpenAdManager].
