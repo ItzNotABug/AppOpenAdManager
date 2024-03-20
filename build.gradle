@@ -7,11 +7,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.3.1'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
 
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.6.0'
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.3'
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.28.0'
     }
 }
 
@@ -35,5 +35,5 @@ allprojects {
 }
 
 tasks.register('clean', Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
