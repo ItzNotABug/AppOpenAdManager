@@ -9,7 +9,7 @@ android {
     namespace 'com.lazygeniouz.aoa'
 
     defaultConfig {
-        minSdk 19
+        minSdk 21
         targetSdk 34
     }
 
