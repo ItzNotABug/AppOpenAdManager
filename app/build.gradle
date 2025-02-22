@@ -3,13 +3,16 @@ plugins {
     id 'kotlin-android'
 }
 
+ext.kotlin_version = '2.1.10'
+
 android {
-    compileSdkVersion 31
+    compileSdk 35
+    namespace 'com.lazygeniouz.appopenads'
 
     defaultConfig {
         applicationId "com.lazygeniouz.appopenads"
-        minSdkVersion 16
-        targetSdkVersion 31
+        minSdk 21
+        targetSdk 35
         versionCode 1
         versionName "1.0"
     }
@@ -33,9 +36,9 @@ android {
 
 dependencies {
 
-    api 'androidx.work:work-runtime:2.7.0'
+    api 'androidx.work:work-runtime:2.10.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'com.google.android.gms:play-services-ads:20.4.0'
-    implementation project(":library")
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation project(":aoa_manager")
 }
