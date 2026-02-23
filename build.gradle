@@ -1,35 +1,28 @@
-import com.vanniktech.maven.publish.*
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.1'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
-
-        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.6.0'
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.28.0'
-    }
+plugins {
+    id 'com.android.application' version '9.0.1' apply false
+    id 'com.android.library' version '9.0.1' apply false
+    id 'org.jetbrains.dokka' version '2.1.0' apply false
+    id 'com.vanniktech.maven.publish.base' version '0.36.0' apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
+subprojects {
     plugins.withId("com.vanniktech.maven.publish.base") {
-        mavenPublishing {
-            group "com.lazygeniouz"
-            version "2.6.5"
+        version = "2.6.6"
+        group = "com.lazygeniouz"
 
+        mavenPublishing {
             signAllPublications()
             pomFromGradleProperties()
-            publishToMavenCentral(SonatypeHost.S01)
-            configure(new AndroidSingleVariantLibrary("release"))
+            publishToMavenCentral(true)
+            configure(new AndroidSingleVariantLibrary(
+                    new JavadocJar.Dokka("dokkaGenerateHtml"),
+                    new SourcesJar.Sources(),
+                    "release"
+            ))
         }
     }
 }
