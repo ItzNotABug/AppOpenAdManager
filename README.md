@@ -160,12 +160,6 @@ showOnCondition = {
 }
 ```
 
-Custom transitions:
-
-```kotlin
-setAdTransition(R.anim.fade_in, R.anim.fade_out)
-```
-
 Add a brief delay before showing:
 
 ```kotlin
