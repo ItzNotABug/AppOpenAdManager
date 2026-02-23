@@ -16,4 +16,13 @@
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
 
+    <style name="AdActivityTheme" parent="@android:style/Theme.Translucent">
+        <item name="android:windowAnimationStyle">@style/AdActivityAnimation</item>
+    </style>
+
+    <style name="AdActivityAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+    </style>
+
 </resources>

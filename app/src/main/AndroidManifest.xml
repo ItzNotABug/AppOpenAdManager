@@ -31,6 +31,12 @@
         </activity>
 
         <activity android:name=".activities.MainActivity" />
+
+        <!-- Override -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:theme="@style/AdActivityTheme"
+            tools:replace="android:theme" />
     </application>
 
 </manifest>
