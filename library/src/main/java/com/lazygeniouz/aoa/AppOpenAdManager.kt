@@ -60,7 +60,7 @@ class AppOpenAdManager private constructor(
      * Assign a listener to observe AppOpenAd events.
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
-    fun setAppOpenAdListener(adListener: AppOpenAdListener) = apply {
+    fun setAppOpenAdListener(adListener: AppOpenAdListener?) = apply {
         this.listener = adListener
     }
 
@@ -68,7 +68,7 @@ class AppOpenAdManager private constructor(
      * Assign a listener to observe if the AppOpenAd earned any money.
      * @param paidListener An optional listener if you want to observe Ad's monetary values.
      */
-    fun setOnPaidEventListener(paidListener: OnPaidEventListener) = apply {
+    fun setOnPaidEventListener(paidListener: OnPaidEventListener?) = apply {
         this.adPaidEventListener = paidListener
         this.appOpenAdInstance?.onPaidEventListener = paidListener
     }
