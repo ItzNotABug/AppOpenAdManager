@@ -8,6 +8,7 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.appopen.AppOpenAd
+import com.lazygeniouz.aoa.AppOpenAdManager.Companion.get
 import com.lazygeniouz.aoa.base.BaseAdManager
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.logDebug
@@ -15,7 +16,7 @@ import com.lazygeniouz.aoa.idelay.DelayType
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
 
 /**
- * [AppOpenAdManager]: A class that handles all of the App Open Ad operations.
+ * [AppOpenAdManager]: A class that handles all the App Open Ad operations.
  * @param application Required to keep a track of App's state.
  * @param configs A Data class to pass required arguments.
  */
@@ -60,7 +61,7 @@ class AppOpenAdManager private constructor(
      * @param adListener An optional listener if you want to listen to the Ad's visibility events
      */
     fun setAppOpenAdListener(adListener: AppOpenAdListener) = apply {
-        if (listener == null) this.listener = adListener
+        this.listener = adListener
     }
 
     /**
@@ -68,7 +69,8 @@ class AppOpenAdManager private constructor(
      * @param paidListener An optional listener if you want to observe Ad's monetary values.
      */
     fun setOnPaidEventListener(paidListener: OnPaidEventListener) = apply {
-        if (adPaidEventListener == null) this.adPaidEventListener = paidListener
+        this.adPaidEventListener = paidListener
+        this.appOpenAdInstance?.onPaidEventListener = paidListener
     }
 
     /**
@@ -79,6 +81,7 @@ class AppOpenAdManager private constructor(
      */
     fun setImmersiveMode(isImmersiveMode: Boolean) {
         this.isImmersive = isImmersiveMode
+        this.appOpenAdInstance?.setImmersiveMode(isImmersiveMode)
     }
 
     /**
@@ -119,7 +122,7 @@ class AppOpenAdManager private constructor(
      * Returns the [AppOpenAd] instance, can be **null** if it is not loaded yet.
      *
      * **Note:** If you manually use `getAppOpenAd().show(activity)`,
-     * then the [setAdTransition] will not work but you may also use
+     * then the [setAdTransition] will not work, but you may also use
      * [Activity.overridePendingTransition] or [Activity.overrideActivityTransition].
      * @return [AppOpenAd]
      */
@@ -184,7 +187,7 @@ class AppOpenAdManager private constructor(
                 /**
                  * If the next session happens after the delay period is over
                  * & under 4 Hours, we can show a cached Ad.
-                 * However this will only work for DelayType.HOURS.
+                 * However, this will only work for DelayType.HOURS.
                  */
                 if (initialDelay.delayPeriodType != DelayType.DAYS ||
                     initialDelay.delayPeriodType == DelayType.DAYS &&

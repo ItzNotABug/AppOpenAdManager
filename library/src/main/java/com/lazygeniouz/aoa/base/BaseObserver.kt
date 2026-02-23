@@ -15,18 +15,16 @@ import android.os.Bundle
  * Extended ahead by:
  * @see BaseAdManager
  */
-open class BaseObserver(application: Application) :
+open class BaseObserver(private val application: Application) :
     Application.ActivityLifecycleCallbacks {
 
     protected var currentActivity: Activity? = null
 
     init {
-        // Cannot directly use `this`
-        // Issue : Leaking 'this' in constructor of non-final class BaseObserver
-        registerActivityLifecycleCallbacks(application)
+        registerActivityLifecycleCallbacks()
     }
 
-    private fun registerActivityLifecycleCallbacks(application: Application) {
+    private fun registerActivityLifecycleCallbacks() {
         application.registerActivityLifecycleCallbacks(this)
     }
 

@@ -1,16 +1,15 @@
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.dokka'
     id 'com.vanniktech.maven.publish.base'
-    id 'kotlin-android'
 }
 
 android {
-    compileSdk 34
+    compileSdk = 36
     namespace 'com.lazygeniouz.aoa'
 
     defaultConfig {
-        minSdk 21
-        targetSdk 34
+        minSdk 23
     }
 
     buildTypes {
@@ -27,6 +26,6 @@ android {
 }
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-process:2.7.0"
-    implementation 'com.google.android.gms:play-services-ads:23.0.0'
+    implementation "androidx.lifecycle:lifecycle-process:2.10.0"
+    implementation 'com.google.android.gms:play-services-ads:25.0.0'
 }
