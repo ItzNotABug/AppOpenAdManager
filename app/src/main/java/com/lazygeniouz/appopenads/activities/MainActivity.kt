@@ -6,6 +6,7 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import com.google.android.gms.ads.AdError
@@ -74,18 +75,29 @@ class MainActivity : ComponentActivity() {
         configInfoView = findViewById(R.id.config_info)
         eventsLogView = findViewById(R.id.events_log)
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+
         displayAdStatus()
         displayConfigInfo()
     }
 
     override fun onStart() {
         super.onStart()
-        app.adManager.setAppOpenAdListener(adListener)
+        app.eventListener = adListener
     }
 
     override fun onStop() {
-        app.adManager.setAppOpenAdListener(null)
+        app.eventListener = null
         super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        displayAdStatus()
     }
 
     private fun addEvent(message: String) {
@@ -149,10 +161,5 @@ class MainActivity : ComponentActivity() {
             builder.delete(builder.length - 1, builder.length)
         }
         configInfoView.text = builder
-    }
-
-    override fun onResume() {
-        super.onResume()
-        displayAdStatus()
     }
 }
