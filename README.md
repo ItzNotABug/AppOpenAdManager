@@ -99,14 +99,13 @@ The delay is tracked per device and applied once.
 
 ### Core Methods
 
-| Method                      | Description               |
-|-----------------------------|---------------------------|
-| `loadAppOpenAd()`           | Load the ad               |
-| `isAdAvailable(): Boolean`  | Check if ad is ready      |
-| `clearAdInstance()`         | Remove ad instance        |
-| `setImmersiveMode(Boolean)` | Toggle immersive mode     |
-| `showAdWithDelay(Long)`     | Delay ad display (ms)     |
-| `setAdTransition(Int, Int)` | Set enter/exit animations |
+| Method                      | Description           |
+|-----------------------------|-----------------------|
+| `loadAppOpenAd()`           | Load the ad           |
+| `isAdAvailable(): Boolean`  | Check if ad is ready  |
+| `clearAdInstance()`         | Remove ad instance    |
+| `setImmersiveMode(Boolean)` | Toggle immersive mode |
+| `showAdWithDelay(Long)`     | Delay ad display (ms) |
 
 ### Event Listeners
 

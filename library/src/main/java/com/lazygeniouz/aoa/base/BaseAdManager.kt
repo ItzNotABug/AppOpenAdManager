@@ -19,7 +19,7 @@ import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.idelay.InitialDelay
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
 import java.time.Instant
-import java.util.*
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
@@ -60,7 +60,6 @@ abstract class BaseAdManager(
     protected var isImmersive: Boolean = false
     protected var adShowDelayPeriod: Long = 1000
     protected var coldShowListener: (() -> Unit)? = null
-    protected var adEnterTransition: Pair<Int, Int> = 0 to 0
 
     protected var isLoading = false
     protected var isShowingAd = false
