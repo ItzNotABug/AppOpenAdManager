@@ -1,8 +1,6 @@
 package com.lazygeniouz.aoa
 
-import android.app.Activity
 import android.app.Application
-import android.os.Build
 import android.os.Handler
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -85,14 +83,6 @@ class AppOpenAdManager private constructor(
     }
 
     /**
-     * Use an activity animation when the Ad is shown,
-     * similar to [Activity.overridePendingTransition] or [Activity.overrideActivityTransition].
-     */
-    fun setAdTransition(enterAnim: Int, exitAnim: Int) {
-        this.adEnterTransition = enterAnim to exitAnim
-    }
-
-    /**
      * Set a delay for showing the AppOpenAd.
      *
      * The [AppOpenAdListener.onAdWillShow] will be invoked
@@ -121,9 +111,6 @@ class AppOpenAdManager private constructor(
     /**
      * Returns the [AppOpenAd] instance, can be **null** if it is not loaded yet.
      *
-     * **Note:** If you manually use `getAppOpenAd().show(activity)`,
-     * then the [setAdTransition] will not work, but you may also use
-     * [Activity.overridePendingTransition] or [Activity.overrideActivityTransition].
      * @return [AppOpenAd]
      */
     fun getAppOpenAd(): AppOpenAd? {
@@ -209,25 +196,11 @@ class AppOpenAdManager private constructor(
                     listener?.onAdWillShow()
                     Handler(activity.mainLooper).postDelayed({
                         appOpenAd.show(activity)
-                        applyAdEnterTransition(activity)
                     }, this.adShowDelayPeriod)
                 } else {
                     appOpenAd.show(activity)
-                    applyAdEnterTransition(activity)
                 }
             }
-        }
-    }
-
-    private fun applyAdEnterTransition(activity: Activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            activity.overrideActivityTransition(
-                Activity.OVERRIDE_TRANSITION_OPEN,
-                adEnterTransition.first, adEnterTransition.second
-            )
-        } else {
-            @Suppress("deprecation")
-            activity.overridePendingTransition(adEnterTransition.first, adEnterTransition.second)
         }
     }
 
