@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="SplashTheme" parent="android:Theme.Holo.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryVariant">#3700B3</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#03DAC6</item>
+        <item name="colorSecondaryVariant">#018786</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="SplashTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
+    <style name="AdActivityTheme" parent="@android:style/Theme.Translucent">
+        <item name="android:windowAnimationStyle">@style/AdActivityAnimation</item>
+    </style>
+
+    <style name="AdActivityAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
     </style>
 
 </resources>

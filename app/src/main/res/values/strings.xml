@@ -1,4 +1,26 @@
 <resources>
     <string name="app_name">AppOpenAds</string>
-    <string name="appopenads_sample">AppOpenAds Sample</string>
+    <string name="appopenads_sample">AppOpenAdManager</string>
+    <string name="ad_status_label">Ad Status:</string>
+    <string name="ad_status_checking">Checking…</string>
+    <string name="ad_status_ready">Ad loaded and ready</string>
+    <string name="ad_status_loading">Loading ad…</string>
+    <string name="ad_status_unavailable">Ad unavailable</string>
+    <string name="config_label">Configuration:</string>
+    <string name="config_initial_delay">Initial Delay</string>
+    <string name="config_initial_delay_none">NONE</string>
+    <string name="config_show_in_activities">Show In Activities</string>
+    <string name="config_ad_unit">Ad Unit</string>
+    <string name="config_test_ad_unit">TEST_AD_UNIT_ID</string>
+    <string name="config_paid_event_listener">Paid Event Listener</string>
+    <string name="enabled">Enabled</string>
+    <string name="events_label">Events:</string>
+    <string name="events_empty">No events yet</string>
+    <string name="event_ad_loaded">Ad loaded successfully</string>
+    <string name="event_ad_failed_to_load">Failed to load: %1$s</string>
+    <string name="event_ad_will_show">Ad will show</string>
+    <string name="event_ad_shown">Ad shown</string>
+    <string name="event_ad_dismissed">Ad dismissed</string>
+    <string name="event_ad_show_failed">Show failed: %1$s</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>
