@@ -187,7 +187,7 @@ class AppOpenAdManager private constructor(
                 /**
                  * If the next session happens after the delay period is over
                  * & under 4 Hours, we can show a cached Ad.
-                 * However. this will only work for DelayType.HOURS.
+                 * However, this will only work for DelayType.HOURS.
                  */
                 if (initialDelay.delayPeriodType != DelayType.DAYS ||
                     initialDelay.delayPeriodType == DelayType.DAYS &&
