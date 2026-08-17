@@ -4,67 +4,46 @@ package com.lazygeniouz.appopenads
 
 import android.app.Application
 import android.util.Log
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
 import com.lazygeniouz.aoa.AppOpenAdManager
 import com.lazygeniouz.aoa.configs.Configs
 import com.lazygeniouz.aoa.extensions.getAppOpenAdManager
 import com.lazygeniouz.aoa.idelay.InitialDelay
-import com.lazygeniouz.aoa.listener.AppOpenAdListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class App : Application() {
 
     lateinit var adManager: AppOpenAdManager
         private set
 
-    var eventListener: AppOpenAdListener? = null
-
-    private val mainListener = object : AppOpenAdListener() {
-        override fun onAdLoaded() {
-            eventListener?.onAdLoaded()
-        }
-
-        override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-            eventListener?.onAdFailedToLoad(loadAdError)
-        }
-
-        override fun onAdWillShow() {
-            eventListener?.onAdWillShow()
-        }
-
-        override fun onAdShown() {
-            eventListener?.onAdShown()
-        }
-
-        override fun onAdDismissed() {
-            eventListener?.onAdDismissed()
-        }
-
-        override fun onAdShowFailed(error: AdError?) {
-            eventListener?.onAdShowFailed(error)
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
-
-        MobileAds.initialize(this)
 
         adManager = getAppOpenAdManager(
             Configs(initialDelay = InitialDelay.NONE)
         ).apply {
-            setAppOpenAdListener(mainListener)
             setOnPaidEventListener { adValue ->
                 val revenue = adValue.valueMicros / 1_000_000.0
                 Log.d(TAG, "Ad earned: $revenue ${adValue.currencyCode}")
             }
+        }
 
-            loadAppOpenAd()
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(
+                this@App,
+                InitializationConfig
+                    .Builder(TEST_APP_ID)
+                    .build(),
+            )
+            adManager.loadAppOpenAd()
         }
     }
 
     companion object {
         private const val TAG = "AppOpenAds"
+        private const val TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713"
     }
 }

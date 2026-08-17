@@ -8,8 +8,8 @@ import android.os.Bundle
  * Base Observer class to identify the Current visible Activity
  * @param application Required to register Activity Lifecycle Callbacks
  *
- * We only need onActivityStarted, onActivityResumed & onActivityDestroyed
- * to track the Current visible Activity & therefore it was meaningless
+ * We only need onActivityResumed, onActivityPaused & onActivityDestroyed
+ * to track the current visible Activity & therefore it was meaningless
  * to add all those abstract methods in a single class.
  *
  * Extended ahead by:
@@ -28,9 +28,7 @@ open class BaseObserver(private val application: Application) :
         application.registerActivityLifecycleCallbacks(this)
     }
 
-    override fun onActivityStarted(activity: Activity) {
-        currentActivity = activity
-    }
+    override fun onActivityStarted(activity: Activity) {}
 
     override fun onActivityResumed(activity: Activity) {
         currentActivity = activity
@@ -38,12 +36,12 @@ open class BaseObserver(private val application: Application) :
 
     override fun onActivityDestroyed(activity: Activity) {
         // this is required for [Configs.showOnColdStart]
-        if (currentActivity?.javaClass?.simpleName.equals(activity.javaClass.simpleName)) {
-            currentActivity = null
-        }
+        if (currentActivity === activity) currentActivity = null
     }
 
-    override fun onActivityPaused(activity: Activity) {}
+    override fun onActivityPaused(activity: Activity) {
+        if (currentActivity === activity) currentActivity = null
+    }
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}

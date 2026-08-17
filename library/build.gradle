@@ -5,27 +5,27 @@ plugins {
 }
 
 android {
-    compileSdk = 36
-    namespace 'com.lazygeniouz.aoa'
+    compileSdk = 35
+    namespace = 'com.lazygeniouz.aoa'
 
     defaultConfig {
-        minSdk 23
+        minSdk = 24
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-process:2.10.0"
-    implementation 'com.google.android.gms:play-services-ads:25.0.0'
+    implementation "androidx.lifecycle:lifecycle-process:2.11.0"
+    api 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.3.1'
 }

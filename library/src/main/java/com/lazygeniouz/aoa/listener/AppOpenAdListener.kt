@@ -1,7 +1,7 @@
 package com.lazygeniouz.aoa.listener
 
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.LoadAdError
+import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
+import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 
 /**
  * Interface to listen to the AppOpenAd's events
@@ -9,12 +9,12 @@ import com.google.android.gms.ads.LoadAdError
 abstract class AppOpenAdListener {
 
     /**
-     * Callback fired when the Ad is loaded & ready to be shown on the next app resume.
+     * Callback fired whenever a preloaded Ad is ready to be shown on the next app resume.
      */
     open fun onAdLoaded() {}
 
     /**
-     * AppOpenAd failed to load, see **loadAdError** for more info.
+     * An AppOpenAd preload attempt failed. The SDK retries automatically.
      *
      * @param loadAdError Contains info. as to what went wrong with loading Ad
      * @see LoadAdError
@@ -22,10 +22,7 @@ abstract class AppOpenAdListener {
     open fun onAdFailedToLoad(loadAdError: LoadAdError) {}
 
     /**
-     * Fired sometime before the Ad is shown
-     *
-     * The Ad will be shown after a delay of a 1000ms or the time provided
-     * post this callback so that an action can be performed if needed before showing the Ad
+     * Fired immediately before the SDK is asked to show the Ad, after any configured delay.
      */
     open fun onAdWillShow() {}
 
@@ -41,7 +38,7 @@ abstract class AppOpenAdListener {
 
     /**
      * Fired when there was a problem showing AppOpenAd
-     * @param error [AdError] that is passed on from the AppOpenAd's callback stating the reason
+     * @param error [FullScreenContentError] describing the show failure.
      */
-    open fun onAdShowFailed(error: AdError?) {}
+    open fun onAdShowFailed(error: FullScreenContentError) {}
 }

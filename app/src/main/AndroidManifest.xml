@@ -14,10 +14,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
-
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
@@ -31,12 +27,6 @@
         </activity>
 
         <activity android:name=".activities.MainActivity" />
-
-        <!-- Override -->
-        <activity
-            android:name="com.google.android.gms.ads.AdActivity"
-            android:theme="@style/AdActivityTheme"
-            tools:replace="android:theme" />
     </application>
 
 </manifest>

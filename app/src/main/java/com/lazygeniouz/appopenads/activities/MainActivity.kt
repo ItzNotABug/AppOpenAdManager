@@ -1,16 +1,58 @@
 package com.lazygeniouz.appopenads.activities
 
+import android.os.Build
 import android.os.Bundle
-import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.widget.TextView
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.content.ContextCompat
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.LoadAdError
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
+import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 import com.lazygeniouz.aoa.listener.AppOpenAdListener
 import com.lazygeniouz.appopenads.App
 import com.lazygeniouz.appopenads.R
@@ -18,14 +60,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Sample App's Main Activity */
+/** Sample App's Main Activity. */
 class MainActivity : ComponentActivity() {
 
-    private lateinit var adStatusView: TextView
-    private lateinit var configInfoView: TextView
-    private lateinit var eventsLogView: TextView
-    private val events = mutableListOf<String>()
-
+    private var adStatus by mutableStateOf(AdStatus.PRELOADING)
+    private var events by mutableStateOf<List<String>>(emptyList())
     private val timeFormat by lazy { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
     private val app: App
@@ -33,12 +72,12 @@ class MainActivity : ComponentActivity() {
 
     private val adListener = object : AppOpenAdListener() {
         override fun onAdLoaded() {
-            displayAdStatus()
+            if (adStatus != AdStatus.SHOWING) refreshStatus()
             addEvent(getString(R.string.event_ad_loaded))
         }
 
         override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-            displayAdStatus()
+            if (adStatus != AdStatus.SHOWING) refreshStatus()
             addEvent(getString(R.string.event_ad_failed_to_load, loadAdError.message))
         }
 
@@ -47,119 +86,225 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onAdShown() {
-            displayAdStatus()
+            adStatus = AdStatus.SHOWING
             addEvent(getString(R.string.event_ad_shown))
         }
 
         override fun onAdDismissed() {
-            displayAdStatus()
+            refreshStatus()
             addEvent(getString(R.string.event_ad_dismissed))
         }
 
-        override fun onAdShowFailed(error: AdError?) {
-            addEvent(
-                getString(
-                    R.string.event_ad_show_failed,
-                    error?.message ?: getString(R.string.unknown_error)
-                )
-            )
+        override fun onAdShowFailed(error: FullScreenContentError) {
+            refreshStatus()
+            addEvent(getString(R.string.event_ad_show_failed, error.message))
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.main)
-
-        adStatusView = findViewById(R.id.ad_status)
-        configInfoView = findViewById(R.id.config_info)
-        eventsLogView = findViewById(R.id.events_log)
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                finish()
+        app.adManager.setAppOpenAdListener(adListener)
+        setContent {
+            SampleTheme {
+                SampleScreen(
+                    adStatus = adStatus,
+                    events = events,
+                )
             }
-        })
-
-        displayAdStatus()
-        displayConfigInfo()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        app.eventListener = adListener
-    }
-
-    override fun onStop() {
-        app.eventListener = null
-        super.onStop()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        displayAdStatus()
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.navigationBars())
+            systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+        if (adStatus != AdStatus.SHOWING) refreshStatus()
+    }
+
+    override fun onDestroy() {
+        if (app.adManager.getAdListener() === adListener) {
+            app.adManager.setAppOpenAdListener(null)
+        }
+        super.onDestroy()
     }
 
     private fun addEvent(message: String) {
-        val timestamp = timeFormat.format(Date())
-        val event = "[$timestamp] $message"
-        events.add(0, event)
-        if (events.size > 30) {
-            events.removeAt(events.lastIndex)
-        }
-        eventsLogView.text = events.joinToString("\n")
+        val event = "[${timeFormat.format(Date())}] $message"
+        events = (listOf(event) + events).take(MAX_EVENTS)
     }
 
-    private fun displayAdStatus() {
-        val adManager = app.adManager
-        val isAvailable = adManager.isAdAvailable()
-
-        adStatusView.text = when {
-            isAvailable -> getString(R.string.ad_status_ready)
-            adManager.getAppOpenAd() == null -> getString(R.string.ad_status_loading)
-            else -> getString(R.string.ad_status_unavailable)
-        }
+    private fun refreshStatus() {
+        adStatus = if (app.adManager.isAdAvailable()) AdStatus.READY else AdStatus.PRELOADING
     }
 
-    private fun displayConfigInfo() {
-        val builder = SpannableStringBuilder()
-        val keyColor = ContextCompat.getColor(this, R.color.config_key)
-        val valueColor = ContextCompat.getColor(this, R.color.config_value)
+    private companion object {
+        const val MAX_EVENTS = 30
+    }
+}
 
-        fun addConfigItem(key: String, value: String) {
-            val startKey = builder.length
-            builder.append(key).append(": ")
-            builder.setSpan(
-                ForegroundColorSpan(keyColor),
-                startKey,
-                builder.length - 2,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+private enum class AdStatus {
+    PRELOADING,
+    READY,
+    SHOWING,
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SampleTheme(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
+    val colorScheme = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && darkTheme -> dynamicDarkColorScheme(context)
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicLightColorScheme(context)
+        darkTheme -> darkColorScheme()
+        else -> lightColorScheme()
+    }
+
+    MaterialExpressiveTheme(
+        colorScheme = colorScheme,
+        content = content,
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SampleScreen(
+    adStatus: AdStatus,
+    events: List<String>,
+) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            LargeFlexibleTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.appopenads_sample),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                subtitle = { Text(stringResource(R.string.sample_subtitle)) },
+                scrollBehavior = scrollBehavior,
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item {
+                StatusCard(adStatus)
+            }
+            item { EventsCard(events) }
+        }
+    }
+}
+
+@Composable
+private fun StatusCard(adStatus: AdStatus) {
+    val statusText = when (adStatus) {
+        AdStatus.PRELOADING -> stringResource(R.string.ad_status_loading)
+        AdStatus.READY -> stringResource(R.string.ad_status_ready)
+        AdStatus.SHOWING -> stringResource(R.string.ad_status_showing)
+    }
+    val statusSymbol = when (adStatus) {
+        AdStatus.PRELOADING -> "…"
+        AdStatus.READY -> "✓"
+        AdStatus.SHOWING -> "↑"
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                        shape = CircleShape,
+                    )
+                    .clearAndSetSemantics { },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = statusSymbol,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.ad_status_label),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EventsCard(events: List<String>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.events_label),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
             )
 
-            val startValue = builder.length
-            builder.append(value).append('\n')
-            builder.setSpan(
-                ForegroundColorSpan(valueColor),
-                startValue,
-                builder.length - 1,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            if (events.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.events_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                events.forEachIndexed { index, event ->
+                    Text(
+                        text = event,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                    if (index != events.lastIndex) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    }
+                }
+            }
         }
-
-        addConfigItem(
-            getString(R.string.config_initial_delay),
-            getString(R.string.config_initial_delay_none)
-        )
-        addConfigItem(
-            getString(R.string.config_show_in_activities),
-            SplashActivity::class.java.simpleName
-        )
-        addConfigItem(getString(R.string.config_ad_unit), getString(R.string.config_test_ad_unit))
-        addConfigItem(getString(R.string.config_paid_event_listener), getString(R.string.enabled))
-
-        if (builder.isNotEmpty()) {
-            builder.delete(builder.length - 1, builder.length)
-        }
-        configInfoView.text = builder
     }
 }
