@@ -83,11 +83,16 @@ class AppOpenAdManager private constructor(
             logDebug("Current adUnitId is a Test Ad Unit Id, make sure to replace with yours in Production.")
         }
 
-        val started = AppOpenAdPreloader.start(
-            preloadId,
-            preloadConfiguration,
-            preloadCallback,
-        )
+        val started = try {
+            AppOpenAdPreloader.start(
+                preloadId,
+                preloadConfiguration,
+                preloadCallback,
+            )
+        } catch (error: RuntimeException) {
+            isPreloadingStarted = false
+            throw error
+        }
         isPreloadingStarted = started
         logDebug(if (started) "Started App Open Ad preloading." else "App Open Ad preloading could not be started.")
     }
