@@ -1,54 +1,75 @@
 # AppOpenAdManager
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.lazygeniouz/aoa_manager?color=blue)](https://central.sonatype.com/artifact/com.lazygeniouz/aoa_manager) [![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg)](https://android-arsenal.com/api?level=23) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/af51d9b73c4544cca0be5e0af1b2669c)](https://app.codacy.com/gh/ItzNotABug/AppOpenAdManager) [![Kotlin](https://img.shields.io/badge/Kotlin-2.3-purple.svg)](https://kotlinlang.org)
+[![Maven Central](https://img.shields.io/maven-central/v/com.lazygeniouz/aoa_manager?color=blue)](https://central.sonatype.com/artifact/com.lazygeniouz/aoa_manager) [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
 
-Android Kotlin library
-for [AdMob App Open Ads](https://developers.google.com/admob/android/app-open-ads).
-Ship App Open Ads faster without maintaining lifecycle-heavy ad management code.
+A lightweight Android lifecycle wrapper for App Open Ads from the
+[Google Mobile Ads Next-Gen SDK](https://developers.google.com/admob/android/next-gen).
 
-## Why AppOpenAdManager
+## Requirements
 
-Implementing App Open Ads in Android means handling lifecycle observers, activity state, ad expiry,
-and display conditions. AppOpenAdManager wraps that into a focused API, so you keep control over
-monetization logic and reduce integration overhead.
+- minSdk 24+
+- compileSdk 35+
+- Kotlin 2.4+
+- SDK initialization before starting preloading
 
-Use it when you need:
-
-- Delayed first impression ads for a better new-user experience
-- Activity-level ad targeting (show only on selected screens)
-- Conditional display logic (for example, no ads for premium users)
-- App Open Ad lifecycle callbacks and paid-event hooks in one place
+The library targets Java 11 and does not require core-library desugaring. The sample uses API 37
+for the latest Material 3 Expressive alpha.
 
 ## Installation
 
-![Latest Version](https://img.shields.io/maven-central/v/com.lazygeniouz/aoa_manager?label=latest&color=blue)
-
 ```gradle
 dependencies {
-    implementation 'com.lazygeniouz:aoa_manager:$version'
+    implementation 'com.lazygeniouz:aoa_manager:3.0.0'
 }
 ```
 
-## Quick Start (Android)
+## Usage
 
-Minimal setup in your `Application` class:
+Initialize GMA Next-Gen on a background thread, then start preloading once:
 
 ```kotlin
+import android.app.Application
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
+import com.lazygeniouz.aoa.AppOpenAdManager
+import com.lazygeniouz.aoa.configs.Configs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 class MyApp : Application() {
+    private lateinit var appOpenAdManager: AppOpenAdManager
+
     override fun onCreate() {
         super.onCreate()
 
-        AppOpenAdManager.get(
+        appOpenAdManager = AppOpenAdManager.get(
             this,
-            Configs(
-                adUnitId = "ca-app-pub-xxxxx/xxxxx"
+            Configs(adUnitId = "ca-app-pub-xxxxx/xxxxx"),
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(
+                this@MyApp,
+                InitializationConfig
+                    .Builder("ca-app-pub-xxxxx~xxxxx")
+                    .build(),
             )
-        ).loadAppOpenAd()
+            appOpenAdManager.loadAppOpenAd()
+        }
     }
 }
 ```
 
-Advanced setup with common monetization controls:
+`loadAppOpenAd()` uses Google's beta
+[App Open Ad preloader](https://developers.google.com/admob/android/next-gen/app-open#start_ad_preloading),
+which manages caching, retries, refills, and expiration. `clearAdInstance()` stops preloading and
+destroys its cached ads. Create and retain one manager per ad configuration.
+
+For AdMob Mediation, start preloading from the initialization completion callback. Apps using UMP
+must also keep their AdMob app ID in the manifest.
+
+## Configuration
 
 ```kotlin
 val adManager = AppOpenAdManager.get(
@@ -56,112 +77,49 @@ val adManager = AppOpenAdManager.get(
     Configs(
         initialDelay = InitialDelay(1, DelayType.DAYS),
         adUnitId = "ca-app-pub-xxxxx/xxxxx",
-        showOnColdStart = { true },
+        showOnColdStart = { isLoadingScreenVisible },
         showOnCondition = { !isPremiumUser },
-        showInActivities = arrayListOf(MainActivity::class.java)
-    )
+        showInActivities = arrayListOf(MainActivity::class.java),
+    ),
 )
-
-adManager.apply {
-    setAppOpenAdListener(adListener)
-    setOnPaidEventListener(paidListener)
-    loadAppOpenAd()
-}
 ```
 
-## Configuration
+Use `InitialDelay.NONE` to disable the default one-day delay.
+Cold-start display is attempted once; return `false` as soon as the loading screen finishes.
 
-### `Configs`
-
-| Parameter          | Type                          | Default | Description                   |
-|--------------------|-------------------------------|---------|-------------------------------|
-| `initialDelay`     | `InitialDelay`                | 1 day   | Delay before showing first ad |
-| `adUnitId`         | `String`                      | Test ID | AdMob ad unit ID              |
-| `adRequest`        | `AdRequest`                   | Default | Custom ad request             |
-| `showOnColdStart`  | `(() -> Boolean)?`            | `null`  | Show on app cold start        |
-| `showOnCondition`  | `(() -> Boolean)?`            | `null`  | Conditional display logic     |
-| `showInActivities` | `ArrayList<Class<Activity>>?` | `null`  | Activity whitelist            |
-
-### `InitialDelay`
-
-Control when the first App Open Ad appears:
+## Callbacks
 
 ```kotlin
-InitialDelay.NONE                    // No delay
-InitialDelay()                       // 1 day (default)
-InitialDelay(3, DelayType.DAYS)      // 3 days
-InitialDelay(12, DelayType.HOURS)    // 12 hours
-```
-
-The delay is tracked per device and applied once.
-
-## API
-
-### Core Methods
-
-| Method                      | Description           |
-|-----------------------------|-----------------------|
-| `loadAppOpenAd()`           | Load the ad           |
-| `isAdAvailable(): Boolean`  | Check if ad is ready  |
-| `clearAdInstance()`         | Remove ad instance    |
-| `setImmersiveMode(Boolean)` | Toggle immersive mode |
-| `showAdWithDelay(Long)`     | Delay ad display (ms) |
-
-### Event Listeners
-
-Ad lifecycle events:
-
-```kotlin
-setAppOpenAdListener(object : AppOpenAdListener() {
+adManager.setAppOpenAdListener(object : AppOpenAdListener() {
     override fun onAdLoaded() {}
     override fun onAdWillShow() {}
     override fun onAdShown() {}
     override fun onAdDismissed() {}
-    override fun onAdFailedToLoad(loadAdError: LoadAdError) {}
-    override fun onAdShowFailed(error: AdError?) {}
+    override fun onAdFailedToLoad(error: LoadAdError) {}
+    override fun onAdShowFailed(error: FullScreenContentError) {}
 })
-```
 
-Revenue tracking:
-
-```kotlin
-setOnPaidEventListener { adValue ->
+adManager.setOnPaidEventListener { adValue ->
     val revenue = adValue.valueMicros / 1_000_000.0
     analytics.logRevenue(revenue, adValue.currencyCode)
 }
 ```
 
-## Testing
+## Migrating from 2.x
 
-Use the official test ad unit during development:
+Version 3 uses GMA Next-Gen and is intentionally a major release. Update these integration points:
 
-```kotlin
-adUnitId = AppOpenAdManager.TEST_AD_UNIT_ID
-```
+- Raise minSdk to 24, compileSdk to at least 35, and Kotlin to 2.4 or newer.
+- Initialize `MobileAds` with `InitializationConfig` on a background thread before preloading.
+- Replace `com.google.android.gms.ads` types with `com.google.android.libraries.ads.mobile.sdk`
+  types.
+- Remove `play-services-ads` and `play-services-ads-lite`; exclude both from mediation adapters.
+- Build custom requests with `AdRequest.Builder(adUnitId)`.
+- Replace `getAppOpenAd()` checks with `isAdAvailable()`; the SDK now owns preloaded ads.
+- Retain one manager instance; the `Application.appOpenAdManager` shortcut is deprecated.
+- Treat `onAdWillShow()` as the final callback after any configured show delay.
+- Handle `FullScreenContentError` in `onAdShowFailed()`.
+- Replace `OnPaidEventListener` with the `(AdValue) -> Unit` paid callback.
 
-Do not use production ad units in debug builds. This can risk AdMob account suspension.
-
-## Common App Open Ad Use Cases
-
-Show ads only in specific activities:
-
-```kotlin
-showInActivities = arrayListOf(
-    MainActivity::class.java,
-    SplashActivity::class.java
-)
-```
-
-Skip ads for premium users:
-
-```kotlin
-showOnCondition = {
-    !userRepository.isPremium()
-}
-```
-
-Add a brief delay before showing:
-
-```kotlin
-showAdWithDelay(2000) // 2 seconds
-```
+During development, use `AppOpenAdManager.TEST_AD_UNIT_ID`; do not use a production ad unit for
+test traffic.

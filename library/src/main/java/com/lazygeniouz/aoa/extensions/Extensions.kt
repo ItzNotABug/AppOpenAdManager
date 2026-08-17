@@ -35,5 +35,9 @@ fun Application.getAppOpenAdManager(configs: Configs = Configs.DEFAULT): AppOpen
  * @see [Configs]
  * @return [AppOpenAdManager]
  */
+@Deprecated(
+    message = "This property creates a new manager on every access. Create and retain one with getAppOpenAdManager().",
+    replaceWith = ReplaceWith("getAppOpenAdManager()"),
+)
 val Application.appOpenAdManager
     get() = AppOpenAdManager.get(this, Configs.DEFAULT)

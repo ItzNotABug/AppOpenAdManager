@@ -1,34 +1,39 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.plugin.compose'
 }
 
 android {
-    compileSdk = 36
-    namespace "com.lazygeniouz.appopenads"
+    compileSdk = 37
+    namespace = "com.lazygeniouz.appopenads"
 
     defaultConfig {
-        minSdk 23
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
+        minSdk = 24
+        targetSdk = 37
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        compose = true
     }
 }
 
 dependencies {
     implementation project(":library")
-    implementation 'androidx.activity:activity-ktx:1.12.4'
-    implementation 'com.google.android.material:material:1.13.0'
-    implementation 'com.google.android.gms:play-services-ads:25.0.0'
+    implementation 'androidx.activity:activity-compose:1.13.0'
+    implementation 'androidx.compose.material3:material3:1.5.0-alpha26'
+    implementation 'com.google.android.material:material:1.14.0'
 }
