@@ -38,7 +38,7 @@ abstract class AppOpenAdListener {
 
     /**
      * Fired when there was a problem showing AppOpenAd
-     * @param error [FullScreenContentError] passed from the AppOpenAd callback.
+     * @param error [FullScreenContentError] describing the show failure.
      */
     open fun onAdShowFailed(error: FullScreenContentError) {}
 }

@@ -34,6 +34,7 @@ class AppOpenAdManager private constructor(
     private val preloadConfiguration = PreloadConfiguration(adRequest)
     private var appOpenAdInstance: AppOpenAd? = null
     private var pendingShow: Runnable? = null
+    private var isCleared = false
 
     init {
         initialDelay = configs.initialDelay
@@ -52,25 +53,30 @@ class AppOpenAdManager private constructor(
     }
 
     /**
-     * Stops preloading and destroys any cached or pending Ad.
+     * Permanently stops preloading for this manager and cancels any pending Ad show.
+     * A displayed Ad is released after its terminal callback.
      */
     @Synchronized
     fun clearAdInstance() {
+        val wasPreloading = isPreloadingStarted
+        isCleared = true
         isPreloadingStarted = false
-        AppOpenAdPreloader.destroy(preloadId)
+        if (wasPreloading) AppOpenAdPreloader.destroy(preloadId)
         runOnMainThread {
             cancelPendingShow()
-            appOpenAdInstance?.destroy()
-            appOpenAdInstance = null
-            isShowingAd = false
+            if (appOpenAdInstance == null) isShowingAd = false
         }
     }
 
     /**
-     * Starts SDK-managed preloading. Repeated calls for the same Ad request are ignored.
+     * Starts SDK-managed preloading. Repeated calls while preloading are ignored.
      */
     @Synchronized
     fun loadAppOpenAd() {
+        if (isCleared) {
+            logDebug("A cleared App Open Ad manager cannot restart preloading.")
+            return
+        }
         if (isPreloadingStarted) {
             logDebug("App Open Ad preloading is already active.")
             return
@@ -85,7 +91,8 @@ class AppOpenAdManager private constructor(
             preloadConfiguration,
             preloadCallback,
         )
-        logDebug(if (started) "Started App Open Ad preloading." else "App Open Ad preloading is already active.")
+        isPreloadingStarted = started
+        logDebug(if (started) "Started App Open Ad preloading." else "App Open Ad preloading could not be started.")
     }
 
     /**
@@ -205,6 +212,13 @@ class AppOpenAdManager private constructor(
             } catch (error: RuntimeException) {
                 releaseAd(ad)
                 logDebug("App Open Ad failed to show: ${error.message}")
+                listener?.onAdShowFailed(
+                    FullScreenContentError(
+                        FullScreenContentError.ErrorCode.INTERNAL_ERROR,
+                        error.message ?: "App Open Ad failed to show.",
+                        null,
+                    )
+                )
             }
         }
 

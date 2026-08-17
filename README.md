@@ -64,7 +64,8 @@ class MyApp : Application() {
 `loadAppOpenAd()` uses Google's beta
 [App Open Ad preloader](https://developers.google.com/admob/android/next-gen/app-open#start_ad_preloading),
 which manages caching, retries, refills, and expiration. `clearAdInstance()` stops preloading and
-destroys its cached ads. Create and retain one manager per ad configuration.
+destroys its cached ads. A cleared manager cannot be restarted. Create and retain one manager per
+ad configuration.
 
 For AdMob Mediation, start preloading from the initialization completion callback. Apps using UMP
 must also keep their AdMob app ID in the manifest.
