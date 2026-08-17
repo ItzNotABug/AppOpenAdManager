@@ -19,7 +19,7 @@ for the latest Material 3 Expressive alpha.
 
 ```gradle
 dependencies {
-    implementation 'com.lazygeniouz:aoa_manager:3.0.0'
+    implementation 'com.lazygeniouz:aoa_manager:$version'
 }
 ```
 
