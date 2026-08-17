@@ -30,11 +30,13 @@ class AppOpenAdManager private constructor(
 ) : BaseAdManager(application) {
 
     private val adRequest = configs.adRequest ?: AdRequest.Builder(configs.adUnitId).build()
-    private val preloadId = "${adRequest.adUnitId}:${System.identityHashCode(this)}"
+    private var preloadGeneration = 0
+    @Volatile
+    private var preloadId = createPreloadId()
     private val preloadConfiguration = PreloadConfiguration(adRequest)
     private var appOpenAdInstance: AppOpenAd? = null
     private var pendingShow: Runnable? = null
-    private var isCleared = false
+    private var pendingShowPreloadId: String? = null
 
     init {
         initialDelay = configs.initialDelay
@@ -46,25 +48,24 @@ class AppOpenAdManager private constructor(
      */
     @Suppress("MemberVisibilityCanBePrivate")
     fun isAdAvailable(): Boolean {
-        return isPreloadingStarted &&
-            !isShowingAd &&
-            isInitialDelayOver() &&
-            AppOpenAdPreloader.isAdAvailable(preloadId)
+        return isAdAvailable(preloadId)
     }
 
     /**
-     * Permanently stops preloading for this manager and cancels any pending Ad show.
+     * Stops preloading and cancels any pending Ad show. Call [loadAppOpenAd] to start again.
      * A displayed Ad is released after its terminal callback.
      */
     @Synchronized
     fun clearAdInstance() {
+        val stoppedPreloadId = preloadId
         val wasPreloading = isPreloadingStarted
-        isCleared = true
         isPreloadingStarted = false
-        if (wasPreloading) AppOpenAdPreloader.destroy(preloadId)
+        preloadGeneration += 1
+        preloadId = createPreloadId()
+        if (wasPreloading) AppOpenAdPreloader.destroy(stoppedPreloadId)
         runOnMainThread {
-            cancelPendingShow()
-            if (appOpenAdInstance == null) isShowingAd = false
+            val cancelledPendingShow = cancelPendingShow(stoppedPreloadId)
+            if (cancelledPendingShow && appOpenAdInstance == null) isShowingAd = false
         }
     }
 
@@ -73,10 +74,6 @@ class AppOpenAdManager private constructor(
      */
     @Synchronized
     fun loadAppOpenAd() {
-        if (isCleared) {
-            logDebug("A cleared App Open Ad manager cannot restart preloading.")
-            return
-        }
         if (isPreloadingStarted) {
             logDebug("App Open Ad preloading is already active.")
             return
@@ -161,11 +158,17 @@ class AppOpenAdManager private constructor(
     }
 
     override fun onAppResume() {
-        if (isAdAvailable()) showAd()
+        val expectedPreloadId = preloadId
+        if (isAdAvailable(expectedPreloadId)) {
+            showAd(expectedPreloadId)
+        }
     }
 
-    private fun showAd(additionalShowCondition: (() -> Boolean)? = null) {
-        if (isShowingAd) return
+    private fun showAd(
+        expectedPreloadId: String,
+        additionalShowCondition: (() -> Boolean)? = null,
+    ) {
+        if (isShowingAd || preloadId != expectedPreloadId) return
 
         val activity = currentActivity ?: return
         if (!isActivityReady(activity)) return
@@ -177,8 +180,11 @@ class AppOpenAdManager private constructor(
         isShowingAd = true
 
         val showAction = Runnable {
-            pendingShow = null
-            if (!isPreloadingStarted || !isActivityReady(activity)) {
+            if (pendingShowPreloadId == expectedPreloadId) {
+                pendingShow = null
+                pendingShowPreloadId = null
+            }
+            if (!isPreloadingStarted || preloadId != expectedPreloadId || !isActivityReady(activity)) {
                 isShowingAd = false
                 return@Runnable
             }
@@ -188,7 +194,7 @@ class AppOpenAdManager private constructor(
                 return@Runnable
             }
 
-            val ad = AppOpenAdPreloader.pollAd(preloadId)
+            val ad = AppOpenAdPreloader.pollAd(expectedPreloadId)
             if (ad == null) {
                 isShowingAd = false
                 return@Runnable
@@ -198,32 +204,40 @@ class AppOpenAdManager private constructor(
             ad.adEventCallback = getAdEventCallback(ad)
             appOpenAdInstance = ad
             listener?.onAdWillShow()
-            if (!isPreloadingStarted ||
-                appOpenAdInstance !== ad ||
-                !isActivityReady(activity) ||
-                !canShowAd(additionalShowCondition)
-            ) {
+            if (!canShowAd(additionalShowCondition)) {
                 releaseAd(ad)
                 return@Runnable
             }
 
-            try {
-                ad.show(activity)
-            } catch (error: RuntimeException) {
-                releaseAd(ad)
-                logDebug("App Open Ad failed to show: ${error.message}")
-                listener?.onAdShowFailed(
+            val showError = synchronized(this@AppOpenAdManager) {
+                if (!isPreloadingStarted ||
+                    preloadId != expectedPreloadId ||
+                    appOpenAdInstance !== ad ||
+                    !isActivityReady(activity)
+                ) {
+                    releaseAd(ad)
+                    return@Runnable
+                }
+
+                try {
+                    ad.show(activity)
+                    null
+                } catch (error: RuntimeException) {
+                    releaseAd(ad)
+                    logDebug("App Open Ad failed to show: ${error.message}")
                     FullScreenContentError(
                         FullScreenContentError.ErrorCode.INTERNAL_ERROR,
                         error.message ?: "App Open Ad failed to show.",
                         null,
                     )
-                )
+                }
             }
+            showError?.let { listener?.onAdShowFailed(it) }
         }
 
         if (adShowDelayPeriod > 0L) {
             pendingShow = showAction
+            pendingShowPreloadId = expectedPreloadId
             mainHandler.postDelayed(showAction, adShowDelayPeriod)
         } else {
             showAction.run()
@@ -267,30 +281,40 @@ class AppOpenAdManager private constructor(
     private val preloadCallback = object : PreloadCallback {
         override fun onAdPreloaded(preloadId: String, responseInfo: ResponseInfo) {
             mainHandler.post {
-                if (!isPreloadingStarted || preloadId != this@AppOpenAdManager.preloadId) {
-                    return@post
+                val adListener = synchronized(this@AppOpenAdManager) {
+                    if (!isCurrentPreload(preloadId)) return@post
+                    listener
                 }
-                listener?.onAdLoaded()
-                if (!coldStartHandled) {
+                adListener?.onAdLoaded()
+                val shouldCheckColdStart = synchronized(this@AppOpenAdManager) {
+                    isCurrentPreload(preloadId) && !coldStartHandled
+                }
+                if (!shouldCheckColdStart) return@post
+
+                val shouldShowOnColdStart = isInitialDelayOver() &&
+                    configs.showOnColdStart?.invoke() == true
+                synchronized(this@AppOpenAdManager) {
+                    if (!isCurrentPreload(preloadId) || coldStartHandled) return@post
                     coldStartHandled = true
-                    if (isInitialDelayOver() && configs.showOnColdStart?.invoke() == true) {
-                        showAd(configs.showOnColdStart)
-                    }
+                }
+                if (shouldShowOnColdStart) {
+                    showAd(preloadId, configs.showOnColdStart)
                 }
             }
         }
 
         override fun onAdFailedToPreload(preloadId: String, adError: LoadAdError) {
             mainHandler.post {
-                if (!isPreloadingStarted || preloadId != this@AppOpenAdManager.preloadId) {
-                    return@post
+                val adListener = synchronized(this@AppOpenAdManager) {
+                    if (!isCurrentPreload(preloadId)) return@post
+                    listener
                 }
-                listener?.onAdFailedToLoad(adError)
+                adListener?.onAdFailedToLoad(adError)
             }
         }
 
         override fun onAdsExhausted(preloadId: String) {
-            if (isPreloadingStarted && preloadId == this@AppOpenAdManager.preloadId) {
+            if (isCurrentPreload(preloadId)) {
                 logDebug("App Open Ad preload cache is refilling.")
             }
         }
@@ -305,9 +329,28 @@ class AppOpenAdManager private constructor(
             additionalShowCondition?.invoke() != false
     }
 
-    private fun cancelPendingShow() {
+    private fun isAdAvailable(expectedPreloadId: String): Boolean {
+        return isPreloadingStarted &&
+            preloadId == expectedPreloadId &&
+            !isShowingAd &&
+            isInitialDelayOver() &&
+            AppOpenAdPreloader.isAdAvailable(expectedPreloadId)
+    }
+
+    private fun isCurrentPreload(expectedPreloadId: String): Boolean {
+        return isPreloadingStarted && preloadId == expectedPreloadId
+    }
+
+    private fun createPreloadId(): String {
+        return "${adRequest.adUnitId}:${System.identityHashCode(this)}:$preloadGeneration"
+    }
+
+    private fun cancelPendingShow(expectedPreloadId: String): Boolean {
+        if (pendingShowPreloadId != expectedPreloadId) return false
         pendingShow?.let(mainHandler::removeCallbacks)
         pendingShow = null
+        pendingShowPreloadId = null
+        return true
     }
 
     private fun releaseAd(ad: AppOpenAd) {
